@@ -1,3 +1,9 @@
+window.view = function(name) {
+    localStorage.setItem("rname", name);
+    localStorage.setItem("lstatus", `Replay ●`);
+    window.location = "./camera.html";
+}
+
 if (localStorage.getItem("tier") !== "Researcher") {
     document.querySelector("#subscriptionError").style.display = "block";
     document.querySelector("main").style.filter = "blur(2px)";
@@ -49,6 +55,7 @@ function renderTable(data) {
             <td>${row.species}</td>
             <td>${row.count}</td>
             <td>${row.region}</td>
+            <td><button class="toStyleTheButtonOnTheDataPage" onclick="view('Recorded on ${row.dateTime}')">View</button></td>
         `;
         dataTableBody.appendChild(tr);
     });

@@ -17,6 +17,12 @@ window.toggleBookmark = function(name) {
     initializeList();
 };
 
+window.view = function(name) {
+    localStorage.setItem("rname", name);
+    localStorage.setItem("lstatus", "Live ●");
+    window.location = "./camera.html";
+}
+
 init();
 
 function init() {
@@ -35,7 +41,7 @@ function initializeMap() {
     DataFetcher.cameras.forEach(c => {
         c.marker = L.marker([c.lat, c.lng], {icon: bookmarked.has(c.name) ? goldIcon : defaultIcon}).addTo(map).bindPopup(() => {
             const isBookmarked = bookmarked.has(c.name);
-            return `<div>${c.name}<br><button class="${isBookmarked ? "bookmarked" : ""}" onclick="toggleBookmark('${c.name}')">${isBookmarked ? 'Bookmarked' : 'Bookmark'}</button></div>`;
+            return `<div>${c.name}<br><button onclick="view('${c.name}')" style="margin-right: 0.5rem;">View</button><button class="${isBookmarked ? "bookmarked" : ""}" onclick="toggleBookmark('${c.name}')">${isBookmarked ? 'Bookmarked' : 'Bookmark'}</button></div>`;
         });
     });
 }
