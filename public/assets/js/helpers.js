@@ -20,11 +20,19 @@ function renderCameraList(cameras) {
 
         const $button = document.createElement("button");
         $button.textContent = window.bookmarked.has(c.name) ? "Bookmarked" : "Bookmark";
-        window.bookmarked.has(c.name) ? $button.classList.add("bookmarked") : $button.classList.remove("bookmarked")
+        window.bookmarked.has(c.name) ? $button.classList.add("bookmarked") : $button.classList.remove("bookmarked");
         $button.style.float = "right";
         $button.onclick = () => window.toggleBookmark(c.name);
 
+        const $vButton = document.createElement("button");
+        $vButton.textContent = "👁️";
+        $vButton.classList.add("vbutton");
+        $vButton.style.float = "right";
+        window.bookmarked.has(c.name) ? $vButton.classList.add("bookmarked") : $vButton.classList.remove("bookmarked");
+        $vButton.onclick = () => view(c.name);
+
         $li.appendChild($div);
+        $li.appendChild($vButton);
         $li.appendChild($button);
 
         $li.addEventListener("click", (e) => {
@@ -38,4 +46,4 @@ function renderCameraList(cameras) {
     });
 }
 
-export { renderCameraList };
+export {renderCameraList};

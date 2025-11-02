@@ -4,8 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="merge">
+    <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="Final: partial implementation of the video tab">
+      <change afterPath="$PROJECT_DIR$/public/assets/js/camera.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/js/data.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/js/data.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/js/map.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/js/map.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/camera.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/camera.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/data.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/data.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,6 +37,7 @@
   &quot;associatedIndex&quot;: 0
 }</component>
   <component name="ProjectId" id="34NTEXmijQiDnQZVJWIf5dIhoDR" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -38,17 +45,13 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/niels/WebstormProjects/POC-WF/public/assets/css&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;http.proxy&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -63,7 +66,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.26830.93" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.24807.6" />
       </set>
     </attachedChunks>
   </component>
@@ -90,9 +93,9 @@
       <workItem from="1761555403414" duration="6401000" />
       <workItem from="1761565651362" duration="2567000" />
       <workItem from="1761571708490" duration="8000" />
-      <workItem from="1761639330760" duration="12349000" />
-      <workItem from="1761825154270" duration="473000" />
-      <workItem from="1761825767320" duration="69000" />
+      <workItem from="1761639330760" duration="12908000" />
+      <workItem from="1761743146871" duration="3989000" />
+      <workItem from="1761818367809" duration="3452000" />
     </task>
     <task id="LOCAL-00001" summary="Snapshot :-)">
       <option name="closed" value="true" />
@@ -278,15 +281,23 @@
       <option name="project" value="LOCAL" />
       <updated>1761654368525</updated>
     </task>
-    <task id="LOCAL-00024" summary="merge">
+    <task id="LOCAL-00024" summary="Final: finished all the data tab has to offer">
       <option name="closed" value="true" />
-      <created>1761824599816</created>
+      <created>1761655094766</created>
       <option name="number" value="00024" />
       <option name="presentableId" value="LOCAL-00024" />
       <option name="project" value="LOCAL" />
-      <updated>1761824599816</updated>
+      <updated>1761655094766</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Final: partial implementation of the video tab">
+      <option name="closed" value="true" />
+      <created>1761751950525</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1761751950525</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -310,7 +321,8 @@
     <MESSAGE value="Final: partial styling to the filter tab" />
     <MESSAGE value="Final: almost done styling" />
     <MESSAGE value="Final: STYLES THE DATA TAB" />
-    <MESSAGE value="merge" />
-    <option name="LAST_COMMIT_MESSAGE" value="merge" />
+    <MESSAGE value="Final: finished all the data tab has to offer" />
+    <MESSAGE value="Final: partial implementation of the video tab" />
+    <option name="LAST_COMMIT_MESSAGE" value="Final: partial implementation of the video tab" />
   </component>
 </project>

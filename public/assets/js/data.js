@@ -23,23 +23,31 @@ document.querySelector("#filterError #understoodBtn").addEventListener("click", 
     document.querySelector("main").style.filter = "none";
 });
 
-function generateRandomData(region, speciesList, from, to) {
+function generateRandomData(regions, speciesList, from, to) {
     const data = [];
     const start = from ? new Date(from) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const end = to ? new Date(to) : new Date();
+    const adjustForTimezone = (date) => {
+        const timezoneOffset = date.getTimezoneOffset() * 60000;
+        return new Date(date.getTime() - timezoneOffset);
+    };
+    const adjustedStart = adjustForTimezone(start);
+    const adjustedEnd = adjustForTimezone(end);
 
     const daysBetween = Math.max(1, Math.floor((end - start) / (1000 * 3600 * 24)));
     const entriesCount = Math.min(300, daysBetween * 40);
 
     for (let i = 0; i < entriesCount; i++) {
         const randomSpecies = speciesList[Math.floor(Math.random() * speciesList.length)];
-        const timestamp = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        const randomRegion = regions[Math.floor(Math.random() * regions.length)];
+
+        const timestamp = new Date(adjustedStart.getTime() + Math.random() * (adjustedEnd.getTime() - adjustedStart.getTime()));
 
         data.push({
             dateTime: timestamp.toISOString().slice(0, 16).replace("T", " "),
             species: randomSpecies,
             count: Math.floor(Math.random() * 5) + 1,
-            region: region || "Unknown"
+            region: randomRegion || "Unknown"
         });
     }
 
@@ -92,18 +100,35 @@ function renderChart(data) {
 }
 
 generateBtn.addEventListener("click", () => {
-    const region = document.getElementById("regionSelect").value;
+    const regions = Array.from(document.getElementById("regionSelect").selectedOptions).map(o => o.value);
     const species = Array.from(document.getElementById("speciesSelect").selectedOptions).map(o => o.value);
     const from = document.getElementById("fromDate").value;
     const to = document.getElementById("toDate").value;
 
-    if (!region || species.length === 0) {
+    if (regions.length === 0 || species.length === 0) {
         document.querySelector("#filterError").style.display = "block";
         document.querySelector("main").style.filter = "blur(2px)";
         return;
     }
 
-    const data = generateRandomData(region, species, from, to);
+    const data = generateRandomData(regions, species, from, to);
     renderTable(data);
     renderChart(data);
+});
+
+const speciesSearch = document.getElementById("speciesSearch");
+const speciesSelect = document.getElementById("speciesSelect");
+
+speciesSearch.addEventListener("input", function() {
+    const searchQuery = speciesSearch.value.toLowerCase();
+    const speciesOptions = speciesSelect.getElementsByTagName("option");
+
+    Array.from(speciesOptions).forEach(option => {
+        const speciesName = option.textContent.toLowerCase();
+        if (speciesName.includes(searchQuery)) {
+            option.style.display = "";
+        } else {
+            option.style.display = "none";
+        }
+    });
 });
