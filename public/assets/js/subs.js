@@ -8,7 +8,7 @@ function highlightSelectedTier(buttons, tier) {
 function setupSubscriptionButtons() {
     const buttons = document.querySelectorAll(".subscriptionBtn");
     const popup = document.getElementById("confirmPopup");
-    let selectedTier = localStorage.getItem("tier") || "Free";
+    let selectedTier = localStorage.getItem("tier") || "Basic";
     let pendingTier = null;
 
     popup.style.display = "none";

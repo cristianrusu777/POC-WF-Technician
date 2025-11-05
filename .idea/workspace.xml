@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="Merge branch 'main' of github.com:nielsclarysse/POC-WF&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/js/subs.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/js/subs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/subs.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/subs.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,22 +37,19 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/niels/WebstormProjects/POC-WF/public/assets/css&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Merging main",
+    "last_opened_file_path": "C:/Users/niels/WebstormProjects/POC-WF/public/assets/css",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\niels\WebstormProjects\POC-WF\public\assets\css" />
@@ -62,7 +61,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-WS-252.26830.93" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.24807.6" />
       </set>
     </attachedChunks>
   </component>
@@ -91,12 +90,14 @@
       <workItem from="1761571708490" duration="8000" />
       <workItem from="1761639330760" duration="12908000" />
       <workItem from="1761743146871" duration="3989000" />
-      <workItem from="1761818367809" duration="3452000" />
-      <workItem from="1762172907321" duration="1481000" />
-      <workItem from="1762244214486" duration="640000" />
-      <workItem from="1762322606770" duration="635000" />
-      <workItem from="1762329606265" duration="1082000" />
-      <workItem from="1762330742679" duration="3307000" />
+      <workItem from="1761818367809" duration="3519000" />
+      <workItem from="1761822733762" duration="120000" />
+      <workItem from="1761840936555" duration="1150000" />
+      <workItem from="1761895669592" duration="2400000" />
+      <workItem from="1761920206732" duration="48000" />
+      <workItem from="1762080643144" duration="83000" />
+      <workItem from="1762082186291" duration="1302000" />
+      <workItem from="1762083576433" duration="465000" />
     </task>
     <task id="LOCAL-00001" summary="Snapshot :-)">
       <option name="closed" value="true" />
@@ -298,24 +299,93 @@
       <option name="project" value="LOCAL" />
       <updated>1761751950525</updated>
     </task>
-    <task id="LOCAL-00026" summary="Merge branch 'main' of github.com:nielsclarysse/POC-WF&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+    <task id="LOCAL-00026" summary="Final: completed the camera page">
       <option name="closed" value="true" />
-      <created>1762108345789</created>
+      <created>1761821963397</created>
       <option name="number" value="00026" />
       <option name="presentableId" value="LOCAL-00026" />
       <option name="project" value="LOCAL" />
-      <updated>1762108345789</updated>
+      <updated>1761821963397</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Joke: adds green">
+      <option name="closed" value="true" />
+      <created>1761841015333</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1761841015333</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Final: reverts joke :-)">
+      <option name="closed" value="true" />
+      <created>1761841409677</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1761841409677</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Final: scroll improvements">
+      <option name="closed" value="true" />
+      <created>1761844946312</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1761844946312</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Final: small adjustment">
+      <option name="closed" value="true" />
+      <created>1761899536377</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1761899536377</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Final: small adjustment">
+      <option name="closed" value="true" />
+      <created>1761899981642</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1761899981642</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Final: makes region multiple type">
+      <option name="closed" value="true" />
+      <created>1762082356678</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1762082356678</updated>
+    </task>
+    <task id="LOCAL-00033" summary="Final: adds minutes to the filter">
+      <option name="closed" value="true" />
+      <created>1762082854322</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1762082854322</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Final: small style improvement, but need to ask how to style forms nicely for final version (poc)">
+      <option name="closed" value="true" />
+      <created>1762083485797</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1762083485797</updated>
+    </task>
+    <task id="LOCAL-00035" summary="Final: adds search option for the species list">
+      <option name="closed" value="true" />
+      <created>1762083928330</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1762083928330</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Snapshot :-)" />
-    <MESSAGE value="Final: add css template and authentication button" />
-    <MESSAGE value="Final: completes the authentication screen" />
     <MESSAGE value="Final: the map page functions now, just need some styling" />
     <MESSAGE value="Final: all works on map (now try to add bookmarks)" />
     <MESSAGE value="Final: adds the bookmarks!" />
@@ -332,6 +402,15 @@
     <MESSAGE value="Final: STYLES THE DATA TAB" />
     <MESSAGE value="Final: finished all the data tab has to offer" />
     <MESSAGE value="Final: partial implementation of the video tab" />
-    <option name="LAST_COMMIT_MESSAGE" value="Final: partial implementation of the video tab" />
+    <MESSAGE value="Final: completed the camera page" />
+    <MESSAGE value="Joke: adds green" />
+    <MESSAGE value="Final: reverts joke :-)" />
+    <MESSAGE value="Final: scroll improvements" />
+    <MESSAGE value="Final: small adjustment" />
+    <MESSAGE value="Final: makes region multiple type" />
+    <MESSAGE value="Final: adds minutes to the filter" />
+    <MESSAGE value="Final: small style improvement, but need to ask how to style forms nicely for final version (poc)" />
+    <MESSAGE value="Final: adds search option for the species list" />
+    <option name="LAST_COMMIT_MESSAGE" value="Final: adds search option for the species list" />
   </component>
 </project>
