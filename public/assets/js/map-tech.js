@@ -58,6 +58,53 @@ function makeTechCamera(c) {
 
 const techCameras = DataFetcher.cameras.map(makeTechCamera);
 
+// ===== Admin (beheerder) custom cameras management =====
+function loadCustomCams(){
+  try { return JSON.parse(localStorage.getItem('adminCustomCameras')||'[]'); } catch { return []; }
+}
+function saveCustomCams(list){
+  localStorage.setItem('adminCustomCameras', JSON.stringify(list));
+}
+function addCustomCam({name, lat, lng}){
+  const customs = loadCustomCams();
+  if (customs.find(c=>c.name===name)) return { ok:false, msg:'Name already exists' };
+  customs.push({name, lat, lng});
+  saveCustomCams(customs);
+  // Add to runtime
+  const c = makeTechCamera({ name, lat: Number(lat), lng: Number(lng) });
+  c.custom = true;
+  techCameras.push(c);
+  // Place marker if map exists
+  if (window.techMap) createMarker(c);
+  renderList();
+  return { ok:true };
+}
+function deleteCustomCam(name){
+  const customs = loadCustomCams().filter(c=>c.name!==name);
+  saveCustomCams(customs);
+  const idx = techCameras.findIndex(c=>c.name===name && c.custom);
+  if (idx>=0){
+    // remove marker
+    try { techCameras[idx].marker?.remove(); } catch {}
+    techCameras.splice(idx,1);
+  }
+  renderList();
+}
+function updateCustomCam(name, {lat, lng}){
+  const customs = loadCustomCams();
+  const obj = customs.find(c=>c.name===name);
+  if (!obj) return;
+  obj.lat = Number(lat); obj.lng = Number(lng);
+  saveCustomCams(customs);
+  const c = techCameras.find(cc=>cc.name===name && cc.custom);
+  if (c){
+    c.lat = obj.lat; c.lng = obj.lng; c.region = regionFromLatLng(c.lat, c.lng);
+    // update marker position
+    try { c.marker?.setLatLng([c.lat, c.lng]); } catch {}
+  }
+  renderList();
+}
+
 window.toggleBookmark = function(name) {
   const c = techCameras.find(c => c.name === name);
   if (!c) return;
@@ -77,7 +124,12 @@ window.view = function(name) {
   window.location = "./camera-tech.html";
 }
 
-init();
+// Delay init until DOM is ready so elements exist
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { init(); bindUI(); });
+} else {
+  init(); bindUI();
+}
 
 function init() {
   initializeMap();
@@ -87,10 +139,70 @@ function init() {
 
 function initializeMap() {
   const map = L.map("map").setView([20, 10], 2);
+  window.techMap = map;
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: '© OpenStreetMap contributors' }).addTo(map);
 
-  techCameras.forEach(c => {
-    c.marker = L.marker([c.lat, c.lng], { icon: bookmarked.has(c.name) ? goldIcon : defaultIcon }).addTo(map).bindPopup(() => {
+  techCameras.forEach(createMarker);
+
+  // Load and add custom cameras from storage
+  loadCustomCams().forEach(({name, lat, lng})=>{
+    if (techCameras.find(c=>c.name===name)) return;
+    const c = makeTechCamera({ name, lat:Number(lat), lng:Number(lng) });
+    c.custom = true;
+    techCameras.push(c);
+    createMarker(c);
+  });
+}
+
+// Admin table renderer (for Manage Cameras modal)
+function renderAdminTable(){
+  const body = document.getElementById('adminCamBody');
+  if (!body) return;
+  body.innerHTML = '';
+  const customs = loadCustomCams();
+  if (customs.length === 0){
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="4" class="text-center text-muted">No custom cameras yet.</td>';
+    body.appendChild(tr);
+    return;
+  }
+  customs.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.name}</td>
+      <td>${c.lat}</td>
+      <td>${c.lng}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-secondary me-1" data-act="focus">Focus</button>
+        <button class="btn btn-sm btn-outline-danger" data-act="del">Delete</button>
+      </td>`;
+    tr.querySelector('[data-act="focus"]').addEventListener('click', ()=>{
+      const cam = techCameras.find(x=>x.name===c.name);
+      const modalEl = document.getElementById('adminCamsModal');
+      // Hide modal first
+      try { bootstrap.Modal.getOrCreateInstance(modalEl).hide(); } catch {}
+      // After a short tick, focus map and open popup
+      setTimeout(()=>{
+        if (cam?.marker){
+          window.techMap.setView([cam.lat, cam.lng], 8);
+          cam.marker.openPopup();
+        }
+      }, 150);
+    });
+    tr.querySelector('[data-act="del"]').addEventListener('click', ()=>{
+      if (confirm('Delete camera '+c.name+'?')){
+        deleteCustomCam(c.name);
+        renderAdminTable();
+      }
+    });
+    body.appendChild(tr);
+  });
+}
+
+function createMarker(c){
+  c.marker = L.marker([c.lat, c.lng], { icon: bookmarked.has(c.name) ? goldIcon : defaultIcon })
+    .addTo(window.techMap)
+    .bindPopup(() => {
       const isBookmarked = bookmarked.has(c.name);
       const statusClass = c.status === 'online' ? 'status-online' : (c.status === 'degraded' ? 'status-degraded' : 'status-offline');
       return `
@@ -106,7 +218,6 @@ function initializeMap() {
           </div>
         </div>`;
     });
-  });
 }
 
 // ===== Camera Wall (Fullscreen overlay) =====
@@ -201,17 +312,42 @@ function setupTicker(enabled){
   }, 8000);
 }
 
-// Hook up open/close (bind only ONE handler for openWallBtn)
-(() => {
+function bindUI(){
+  // Wall open/close
   const openBtn = document.querySelector('#openWallBtn');
-  if (!openBtn) return;
-  if (document.getElementById('cameraWallModal')) {
-    openBtn.addEventListener('click', openWallModal);
-  } else {
-    openBtn.addEventListener('click', openWall);
+  if (openBtn){
+    if (document.getElementById('cameraWallModal')) {
+      openBtn.addEventListener('click', openWallModal);
+    } else {
+      openBtn.addEventListener('click', openWall);
+    }
   }
-})();
-document.querySelector('#closeWallBtn')?.addEventListener('click', closeWall);
+  document.querySelector('#closeWallBtn')?.addEventListener('click', closeWall);
+
+  // Admin modal
+  const adminBtn = document.querySelector('#openAdminBtn');
+  const adminModalEl = document.getElementById('adminCamsModal');
+  if (adminBtn && adminModalEl){
+    // eslint-disable-next-line no-undef
+    const adminModal = new bootstrap.Modal(adminModalEl);
+    adminBtn.addEventListener('click', ()=>{ renderAdminTable(); adminModal.show(); });
+    const form = document.getElementById('adminCamForm');
+    form?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('admName').value.trim();
+      const lat = parseFloat(document.getElementById('admLat').value);
+      const lng = parseFloat(document.getElementById('admLng').value);
+      if (!name || Number.isNaN(lat) || Number.isNaN(lng)) return;
+      const res = addCustomCam({ name, lat, lng });
+      if (res.ok){
+        form.reset();
+        renderAdminTable();
+      } else {
+        alert(res.msg || 'Unable to add camera');
+      }
+    });
+  }
+}
 
 // ===== Camera Wall (Modal variant using Bootstrap) =====
 function openWallModal() {

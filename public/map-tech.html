@@ -1,3 +1,42 @@
+<!-- Manage Cameras (Admin) Modal -->
+<div class="modal fade" id="adminCamsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Manage Cameras</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="adminCamForm" class="row g-2 align-items-end">
+          <div class="col-md-4">
+            <label for="admName" class="form-label">Name</label>
+            <input id="admName" class="form-control" placeholder="e.g. NewCam-001" required>
+          </div>
+          <div class="col-md-3">
+            <label for="admLat" class="form-label">Latitude</label>
+            <input id="admLat" class="form-control" type="number" step="0.0001" placeholder="45.4215" required>
+          </div>
+          <div class="col-md-3">
+            <label for="admLng" class="form-label">Longitude</label>
+            <input id="admLng" class="form-control" type="number" step="0.0001" placeholder="-75.6972" required>
+          </div>
+          <div class="col-md-2">
+            <button id="admAddBtn" class="btn-tech w-100" type="submit">Add</button>
+          </div>
+        </form>
+        <hr/>
+        <div class="table-responsive">
+          <table class="table table-striped table-sm mb-0">
+            <thead class="table-dark">
+              <tr><th>Name</th><th>Latitude</th><th>Longitude</th><th style="width:160px;">Actions</th></tr>
+            </thead>
+            <tbody id="adminCamBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+ </div>
 <!doctype html>
 <html lang="en">
 <head>
@@ -69,6 +108,7 @@
                     <label class="form-check-label" for="criticalFirst">Critical first</label>
                 </div>
                 <button id="openWallBtn" class="btn-tech w-100 mb-2">Open Camera Wall</button>
+                <button id="openAdminBtn" class="btn-tech w-100">Manage Cameras</button>
             </div>
             <div id="cameraListContainer">
                 <ul class="list-group" id="techCameraList"></ul>
