@@ -1,3 +1,9 @@
+.wall-title { font-weight: 700; }
+.wall-controls { display: inline-flex; gap: 0.75rem; align-items: center; }
+.wall-controls label { display: inline-flex; align-items: center; gap: 0.35rem; margin: 0; }
+.wall-controls .form-range { width: 180px; }
+.modal-header .wall-title { margin-right: 1rem; }
+.modal-header .wall-controls { margin-left: auto; }
 /* === Authentication, ... Button === */
 #authBtn,
 .subscriptionBtn,

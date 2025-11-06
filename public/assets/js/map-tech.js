@@ -157,14 +157,13 @@ function renderWallGrid({ cols = 3, critical = false } = {}) {
   if (critical) cams.sort((a,b)=> wallSeverity(b) - wallSeverity(a));
 
   grid.innerHTML = '';
-  cams.slice(0, cols * 4).forEach(c => {
+  cams.forEach(c => {
     const tile = document.createElement('div');
     tile.className = `wall-tile ${wallSeverity(c) >= 4 ? 'crit' : ''}`;
     const statusClass = c.status === 'online' ? 'status-online' : (c.status === 'degraded' ? 'status-degraded' : 'status-offline');
     tile.innerHTML = `
       <div class="tile-head">
         <div class="fw-semibold">${c.name}</div>
-        <span class="status-badge ${statusClass}">${c.status}</span>
       </div>
       <div class="video-wrap">
         <video src="v.mp4" muted autoplay loop playsinline></video>
@@ -202,8 +201,16 @@ function setupTicker(enabled){
   }, 8000);
 }
 
-// Hook up open/close
-document.querySelector('#openWallBtn')?.addEventListener('click', openWall);
+// Hook up open/close (bind only ONE handler for openWallBtn)
+(() => {
+  const openBtn = document.querySelector('#openWallBtn');
+  if (!openBtn) return;
+  if (document.getElementById('cameraWallModal')) {
+    openBtn.addEventListener('click', openWallModal);
+  } else {
+    openBtn.addEventListener('click', openWall);
+  }
+})();
 document.querySelector('#closeWallBtn')?.addEventListener('click', closeWall);
 
 // ===== Camera Wall (Modal variant using Bootstrap) =====
@@ -219,6 +226,18 @@ function openWallModal() {
   const crit = document.getElementById('mwCriticalFirst');
   cols?.addEventListener('input', renderModalWallGrid);
   crit?.addEventListener('change', renderModalWallGrid);
+
+  // Clean up any lingering overlay/backdrop when modal closes
+  modalEl.addEventListener('hidden.bs.modal', () => {
+    // Hide custom overlay if any
+    const overlay = document.getElementById('cameraWall');
+    if (overlay) overlay.style.display = 'none';
+    // Remove any bootstrap backdrops left behind
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    // Reset body state if needed
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('padding-right');
+  }, { once: true });
 }
 
 function renderModalWallGrid() {
@@ -230,7 +249,7 @@ function renderModalWallGrid() {
   let cams = [...techCameras];
   if (critical) cams.sort((a,b)=> wallSeverity(b) - wallSeverity(a));
   grid.innerHTML = '';
-  cams.slice(0, cols * 4).forEach(c => {
+  cams.forEach(c => {
     const statusClass = c.status === 'online' ? 'status-online' : (c.status === 'degraded' ? 'status-degraded' : 'status-offline');
     const div = document.createElement('div');
     div.className = colMap[cols] || 'col-4';
@@ -238,7 +257,6 @@ function renderModalWallGrid() {
       <div class="border rounded p-2 h-100 d-flex flex-column">
         <div class="d-flex justify-content-between align-items-center mb-1">
           <div class="fw-semibold small">${c.name}</div>
-          <span class="status-badge ${statusClass}">${c.status}</span>
         </div>
         <div class="video-wrap mb-1">
           <video src="v.mp4" class="w-100" muted autoplay loop playsinline></video>
@@ -258,8 +276,7 @@ function renderModalWallGrid() {
   });
 }
 
-// Open modal via the same button without removing overlay behavior
-document.querySelector('#openWallBtn')?.addEventListener('click', openWallModal);
+// (openWallBtn is already bound above conditionally to modal or overlay)
 
 function attachFilters() {
   const $search = document.querySelector("#searchTech");
