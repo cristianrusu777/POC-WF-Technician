@@ -1,5 +1,10 @@
 // Technician camera details page wiring (wireframe-only)
 
+// Auth gate for technician pages
+if (localStorage.getItem('role') !== 'technician') {
+  window.location = './authentication.html';
+}
+
 function rand(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min}
 function randFloat(min,max,dec=1){return +(Math.random()*(max-min)+min).toFixed(dec)}
@@ -40,6 +45,33 @@ function mockDetails() {
   }
 }
 
+function loadCustomCams(){
+  try { return JSON.parse(localStorage.getItem('adminCustomCameras')||'[]'); } catch { return []; }
+}
+function saveCustomCams(list){
+  localStorage.setItem('adminCustomCameras', JSON.stringify(list));
+}
+function isCustomCamera(name){
+  return !!loadCustomCams().find(c=>c.name===name);
+}
+function deleteCustomCam(name){
+  const list = loadCustomCams().filter(c=>c.name!==name);
+  saveCustomCams(list);
+}
+
+function loadStatusOverrides(){
+  try { return JSON.parse(localStorage.getItem('statusOverrides')||'{}'); } catch { return {}; }
+}
+function saveStatusOverride(name, status){
+  const o = loadStatusOverrides();
+  if (!status) delete o[name]; else o[name] = status;
+  localStorage.setItem('statusOverrides', JSON.stringify(o));
+}
+function getDisplayStatus(name, fallback){
+  const o = loadStatusOverrides();
+  return o[name] || fallback;
+}
+
 function init() {
   const rname = localStorage.getItem("rname") || "Unknown Camera";
   const lstatus = localStorage.getItem("lstatus") || "Live ●";
@@ -47,6 +79,8 @@ function init() {
   document.querySelector("#lstatus").textContent = lstatus;
 
   const d = mockDetails();
+  // If there is an override, display it instead of mock
+  d.status = getDisplayStatus(rname, d.status);
   const $status = document.querySelector("#t_status");
   $status.textContent = d.status;
   $status.classList.remove("status-online","status-degraded","status-offline");
@@ -79,6 +113,39 @@ function init() {
   });
   document.querySelector("#btnDiagnose").addEventListener("click", ()=>{
     alert("Diagnostics started (mock)");
+  });
+
+  // Status override controls
+  const $sel = document.querySelector('#statusSelect');
+  const currentOverride = loadStatusOverrides()[rname] || '';
+  $sel.value = currentOverride;
+  document.querySelector('#btnApplyStatus').addEventListener('click', ()=>{
+    const v = $sel.value;
+    saveStatusOverride(rname, v);
+    // Reflect immediately in UI status badge
+    const newStatus = v || d.status;
+    $status.textContent = newStatus;
+    $status.classList.remove("status-online","status-degraded","status-offline");
+    if (newStatus === "online") $status.classList.add("status-online");
+    else if (newStatus === "degraded") $status.classList.add("status-degraded");
+    else $status.classList.add("status-offline");
+    alert('Status updated for '+rname+(v?` → ${v}`:' (system default)'));
+  });
+
+  // Delete custom camera (only if custom)
+  const $del = document.querySelector('#btnDeleteCam');
+  const custom = isCustomCamera(rname);
+  if (custom) {
+    $del.disabled = false;
+    $del.title = '';
+  }
+  $del.addEventListener('click', ()=>{
+    if (!custom) return;
+    if (confirm('Delete camera '+rname+'?')){
+      deleteCustomCam(rname);
+      // Navigate back to map (list will update on load)
+      window.location = './map-tech.html';
+    }
   });
 }
 

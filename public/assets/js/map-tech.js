@@ -59,6 +59,18 @@ function makeTechCamera(c) {
 const techCameras = DataFetcher.cameras.map(makeTechCamera);
 
 // ===== Admin (beheerder) custom cameras management =====
+function loadStatusOverrides(){
+  try { return JSON.parse(localStorage.getItem('statusOverrides')||'{}'); } catch { return {}; }
+}
+function saveStatusOverride(name, status){
+  const o = loadStatusOverrides();
+  o[name] = status;
+  localStorage.setItem('statusOverrides', JSON.stringify(o));
+}
+function getDisplayStatus(c){
+  const o = loadStatusOverrides();
+  return o[c.name] || c.status;
+}
 function loadCustomCams(){
   try { return JSON.parse(localStorage.getItem('adminCustomCameras')||'[]'); } catch { return []; }
 }
@@ -159,22 +171,28 @@ function renderAdminTable(){
   const body = document.getElementById('adminCamBody');
   if (!body) return;
   body.innerHTML = '';
+  // Merge all cameras for listing
   const customs = loadCustomCams();
-  if (customs.length === 0){
+  const all = [
+    ...DataFetcher.cameras.map(c=>({ name:c.name, lat:c.lat, lng:c.lng, custom:false })),
+    ...customs.map(c=>({ name:c.name, lat:Number(c.lat), lng:Number(c.lng), custom:true }))
+  ];
+  if (all.length === 0){
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td colspan="4" class="text-center text-muted">No custom cameras yet.</td>';
+    tr.innerHTML = '<td colspan="5" class="text-center text-muted">No cameras.</td>';
     body.appendChild(tr);
     return;
   }
-  customs.forEach(c => {
+  all.forEach(c => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${c.name}</td>
       <td>${c.lat}</td>
       <td>${c.lng}</td>
+      <td>${c.custom ? 'Custom' : 'Base'}</td>
       <td>
         <button class="btn btn-sm btn-outline-secondary me-1" data-act="focus">Focus</button>
-        <button class="btn btn-sm btn-outline-danger" data-act="del">Delete</button>
+        <button class="btn btn-sm btn-outline-danger" data-act="del" ${c.custom ? '' : 'disabled title="Only custom cameras can be deleted"'}>Delete</button>
       </td>`;
     tr.querySelector('[data-act="focus"]').addEventListener('click', ()=>{
       const cam = techCameras.find(x=>x.name===c.name);
@@ -189,7 +207,9 @@ function renderAdminTable(){
         }
       }, 150);
     });
-    tr.querySelector('[data-act="del"]').addEventListener('click', ()=>{
+    const delBtn = tr.querySelector('[data-act="del"]');
+    delBtn?.addEventListener('click', ()=>{
+      if (!c.custom) return;
       if (confirm('Delete camera '+c.name+'?')){
         deleteCustomCam(c.name);
         renderAdminTable();
@@ -204,12 +224,13 @@ function createMarker(c){
     .addTo(window.techMap)
     .bindPopup(() => {
       const isBookmarked = bookmarked.has(c.name);
-      const statusClass = c.status === 'online' ? 'status-online' : (c.status === 'degraded' ? 'status-degraded' : 'status-offline');
+      const ds = getDisplayStatus(c);
+      const statusClass = ds === 'online' ? 'status-online' : (ds === 'degraded' ? 'status-degraded' : 'status-offline');
       return `
         <div style="min-width: 220px">
           <strong>${c.name}</strong><br>
           <small>${c.region}</small><br>
-          <span class="status-badge ${statusClass}">${c.status}</span><br>
+          <span class="status-badge ${statusClass}">${ds}</span><br>
           Bitrate: <span class="${metricClass('bitrate', c.bitrateMbps)}">${c.bitrateMbps}</span> Mbps · Temp: <span class="${metricClass('temp', c.temperatureC)}">${c.temperatureC}</span>°C<br>
           Storage: <span class="${metricClass('storage', c.storageUsed)}">${c.storageUsed}</span>%<br>
           <div class="action-row" style="margin-top:0.5rem;">
@@ -224,7 +245,8 @@ function createMarker(c){
 let wallTickerInterval;
 
 function wallSeverity(c) {
-  let s = c.status === 'offline' ? 3 : (c.status === 'degraded' ? 1 : 0);
+  const ds = getDisplayStatus(c);
+  let s = ds === 'offline' ? 3 : (ds === 'degraded' ? 1 : 0);
   if (c.storageUsed >= 90) s += 2; else if (c.storageUsed >= 70) s += 1;
   if (c.temperatureC >= 40) s += 2; else if (c.temperatureC >= 35) s += 1;
   if (c.bitrateMbps < 2) s += 2; else if (c.bitrateMbps < 4) s += 1;
@@ -271,14 +293,15 @@ function renderWallGrid({ cols = 3, critical = false } = {}) {
   cams.forEach(c => {
     const tile = document.createElement('div');
     tile.className = `wall-tile ${wallSeverity(c) >= 4 ? 'crit' : ''}`;
-    const statusClass = c.status === 'online' ? 'status-online' : (c.status === 'degraded' ? 'status-degraded' : 'status-offline');
+    const ds = getDisplayStatus(c);
+    const statusClass = ds === 'online' ? 'status-online' : (ds === 'degraded' ? 'status-degraded' : 'status-offline');
     tile.innerHTML = `
       <div class="tile-head">
         <div class="fw-semibold">${c.name}</div>
       </div>
       <div class="video-wrap">
         <video src="v.mp4" muted autoplay loop playsinline></video>
-        <span class="overlay-badge status-badge ${statusClass}">${c.status}</span>
+        <span class="overlay-badge status-badge ${statusClass}">${ds}</span>
       </div>
       <div class="tile-meta">
         <span class="${metricClass('bitrate', c.bitrateMbps)}">${c.bitrateMbps} Mbps</span>
@@ -386,7 +409,8 @@ function renderModalWallGrid() {
   if (critical) cams.sort((a,b)=> wallSeverity(b) - wallSeverity(a));
   grid.innerHTML = '';
   cams.forEach(c => {
-    const statusClass = c.status === 'online' ? 'status-online' : (c.status === 'degraded' ? 'status-degraded' : 'status-offline');
+    const ds = getDisplayStatus(c);
+    const statusClass = ds === 'online' ? 'status-online' : (ds === 'degraded' ? 'status-degraded' : 'status-offline');
     const div = document.createElement('div');
     div.className = colMap[cols] || 'col-4';
     div.innerHTML = `
@@ -396,7 +420,7 @@ function renderModalWallGrid() {
         </div>
         <div class="video-wrap mb-1">
           <video src="v.mp4" class="w-100" muted autoplay loop playsinline></video>
-          <span class="overlay-badge status-badge ${statusClass}">${c.status}</span>
+          <span class="overlay-badge status-badge ${statusClass}">${ds}</span>
         </div>
         <div class="small mb-2" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
           <span class="${metricClass('bitrate', c.bitrateMbps)}">${c.bitrateMbps} Mbps</span>
@@ -442,7 +466,8 @@ function filteredCameras() {
 
   const severity = (c) => {
     // Status weight
-    let s = c.status === 'offline' ? 3 : (c.status === 'degraded' ? 1 : 0);
+    const ds = getDisplayStatus(c);
+    let s = ds === 'offline' ? 3 : (ds === 'degraded' ? 1 : 0);
     // Metric weights
     if (c.storageUsed >= 90) s += 2; else if (c.storageUsed >= 70) s += 1;
     if (c.temperatureC >= 40) s += 2; else if (c.temperatureC >= 35) s += 1;
@@ -481,7 +506,7 @@ function renderList() {
     li.innerHTML = `
       <div class="d-flex w-100 justify-content-between align-items-center">
         <div>
-          <div class="fw-semibold">${c.name} <span class="status-badge ${c.status === 'online' ? 'status-online' : (c.status === 'degraded' ? 'status-degraded' : 'status-offline')}">${c.status}</span></div>
+          <div class="fw-semibold">${c.name} <span class="status-badge ${getDisplayStatus(c) === 'online' ? 'status-online' : (getDisplayStatus(c) === 'degraded' ? 'status-degraded' : 'status-offline')}">${getDisplayStatus(c)}</span></div>
           <small>${c.region} · <span class="${metricClass('bitrate', c.bitrateMbps)}">${c.bitrateMbps}</span> Mbps · <span class="${metricClass('temp', c.temperatureC)}">${c.temperatureC}</span>°C · <span class="${metricClass('storage', c.storageUsed)}">${c.storageUsed}</span>% disk</small>
         </div>
         <div class="action-row">

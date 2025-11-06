@@ -55,11 +55,19 @@ function makeRow(cam){
   return {dateTime, camera: cam.name, region, status, bitrate, temp, storage, uptime, ip};
 }
 
+function getCustomCams(){
+  try { return JSON.parse(localStorage.getItem('adminCustomCameras')||'[]'); } catch { return []; }
+}
+
 function generateData(selectedRegions, selectedStatus, from, to) {
   const start = from ? new Date(from) : new Date(Date.now() - 7*24*60*60*1000);
   const end = to ? new Date(to) : new Date();
   const rows = [];
-  const cams = DataFetcher.cameras.filter(c => selectedRegions.length===0 || selectedRegions.includes(regionFromLatLng(c.lat,c.lng)));
+  // Merge built-in and custom cameras
+  const base = DataFetcher.cameras;
+  const customs = getCustomCams().map(c=>({ name: c.name, lat: Number(c.lat), lng: Number(c.lng) }));
+  const all = base.concat(customs);
+  const cams = all.filter(c => selectedRegions.length===0 || selectedRegions.includes(regionFromLatLng(c.lat,c.lng)));
   const entries = Math.min(300, cams.length * 15);
   for (let i=0;i<entries;i++) {
     const cam = randomChoice(cams);

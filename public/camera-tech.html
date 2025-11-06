@@ -55,6 +55,20 @@
                 <button id="btnUpdate" class="btn-tech">Update Firmware</button>
                 <button id="btnDiagnose" class="btn-tech">Run Diagnostics</button>
             </div>
+            <hr/>
+            <div class="mb-2">
+                <label for="statusSelect" class="form-label"><strong>Change Status</strong></label>
+                <select id="statusSelect" class="form-select form-select-sm">
+                    <option value="">System default</option>
+                    <option value="online">online</option>
+                    <option value="degraded">degraded</option>
+                    <option value="offline">offline</option>
+                </select>
+                <button id="btnApplyStatus" class="btn btn-sm btn-outline-secondary mt-2">Apply</button>
+            </div>
+            <div class="mt-3">
+                <button id="btnDeleteCam" class="btn btn-sm btn-outline-danger w-100" disabled title="Only custom cameras can be deleted">Delete Camera</button>
+            </div>
         </div>
     </div>
 </main>
