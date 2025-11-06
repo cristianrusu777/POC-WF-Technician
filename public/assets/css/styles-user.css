@@ -1,0 +1,440 @@
+/* === Authentication, ... Button === */
+#authBtn,
+.subscriptionBtn,
+#cancelBtn,
+#acceptBtn,
+#sendBtn,
+#understoodBtn,
+#toSubscriptionBtn,
+#generateBtn,
+.vbutton {
+    color: var(--gray-100);
+    background-color: var(--green-300);
+    border: none;
+    border-radius: var(--radius);
+
+    &:hover {
+        background-color: var(--green-400);
+    }
+}
+
+/* === Header (title, nav & logout) & Main & Footer (copyright message) === */
+header, footer {
+    color: var(--gray-100) !important;
+    background-color: var(--green-300);
+    box-shadow: var(--shadow);
+}
+
+header span, header nav li a, #logout {
+    color: var(--gray-100) !important;
+}
+
+header span, header nav li a.active, #logout {
+    font-weight: bold;
+}
+
+main {
+    margin: 2rem 1rem;
+}
+
+footer {
+    width: 100%;
+    padding: 0.25rem 0;
+    position: fixed;
+    bottom: 0;
+}
+
+/* === Map & List & Filter & Data & ... === */
+#ml .col-md-3, .fd, .vl {
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+}
+
+/* === Map === */
+#map {
+    height: 100%;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+
+    & span {
+        color: var(--gray-400);
+    }
+}
+
+.marker-green {
+    filter: hue-rotate(25deg) saturate(0.6) brightness(1.1);
+}
+
+.marker-gold {
+    filter: hue-rotate(-5deg) saturate(1) brightness(1.1);
+}
+
+/* === Camera List === */
+#search {
+    color: var(--gray-500);
+    box-shadow: none;
+
+    &:focus {
+        border-color: var(--gray-500);
+    }
+}
+
+.vbutton {
+    margin-left: 0.5rem;
+}
+
+#cameraList {
+    .list-group-item {
+        margin-bottom: 0.2rem;
+        color: var(--gray-500);
+        border-top: 0.1rem solid var(--green-200);
+
+        &:hover {
+            background-color: var(--green-100);
+        }
+
+        &.gold {
+            border-top: 0.1rem solid var(--accent-gold-300);
+
+            &:hover {
+                background-color: var(--accent-gold-200);
+            }
+        }
+
+        button {
+            padding: 0 0.5rem;
+            background-color: var(--green-200);
+            border-radius: var(--radius);
+
+            & :hover {
+                background-color: var(--green-300);
+            }
+        }
+
+        button.bookmarked {
+            background-color: var(--accent-gold-300);
+
+            &:hover {
+                background-color: var(--accent-gold-400);
+            }
+        }
+    }
+}
+
+#cameraListContainer {
+    height: 100%;
+    overflow-y: auto;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+
+    &::-webkit-scrollbar {
+        width: 0.5rem;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--green-300);
+        border-radius: var(--radius);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--green-400);
+        border-radius: var(--radius);
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--green-400);
+    }
+}
+
+.scol {
+    margin-right: 1rem;
+    padding: 0;
+}
+
+/* === Subscription Card === */
+.subscriptions {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    height: 80vh;
+
+    & .card {
+        height: 100%;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+
+    & .card-body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        & h3 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        & li {
+            margin: 0.75rem 0;
+            list-style: circle;
+        }
+
+        & button {
+            align-self: center;
+            margin-top: auto;
+            width: 100%;
+
+            &:hover {
+                color: var(--gray-100);
+            }
+        }
+    }
+
+    & .selected {
+        background-color: var(--accent-gold-300);
+
+        &:hover {
+            background-color: var(--accent-gold-400) !important;
+        }
+    }
+}
+
+/* === Subscription confirmation === */
+#confirmPopup, #filterError, #subscriptionError {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 0.125rem solid var(--green-300);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    z-index: 8989;
+
+    & p {
+        text-align: center;
+    }
+
+    & button {
+        display: inline-block;
+        width: 49%;
+        padding: 0.5rem;
+    }
+
+    & form input {
+        width: 100%;
+        margin-bottom: 0.25rem;
+        border: 0.1rem solid var(--gray-200);
+        border-radius: var(--radius);
+
+        &:last-of-type {
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+/* === Filter Options === */
+#filterError #understoodBtn,
+#subscriptionError #toSubscriptionBtn {
+    width: 100%;
+}
+
+#regionSelect option:checked,
+#speciesSelect option:checked {
+    background-color: var(--green-200);
+}
+
+.frow, .fcol, .fcard, .fcbody {
+    height: 100%;
+
+    & .card {
+        height: 100%;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+
+    & .card-body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        & h3 {
+            margin-bottom: 0;
+            text-align: center;
+        }
+
+        & select, & input {
+            color: var(--gray-500);
+            box-shadow: none;
+
+            &:focus {
+                border-color: var(--gray-500);
+            }
+
+            &::-webkit-scrollbar {
+                width: 0.5rem;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: var(--green-300);
+                border-radius: var(--radius);
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: var(--green-400);
+                border-radius: var(--radius);
+            }
+
+            &::-webkit-scrollbar-thumb:hover {
+                background: var(--green-400);
+            }
+        }
+
+        & button {
+            align-self: center;
+            margin-top: auto;
+        }
+    }
+}
+
+.fcbody div {
+    margin: 0.7rem 0;
+}
+
+.dcol {
+    margin-right: 1rem;
+    padding: 0;
+
+    & ul li button {
+        color: var(--gray-500);
+
+        &:hover {
+            color: var(--gray-500);
+        }
+    }
+
+    & .tab-content {
+        height: 100%;
+        overflow: hidden;
+        border-radius: var(--radius);
+
+        .table-dark th {
+            color: white;
+            background-color: var(--green-300);
+        }
+    }
+}
+
+.tab-content, #dataTab, table, tr {
+    width: 100%;
+}
+
+tr {
+    display: flex;
+}
+
+th, td {
+    flex: 1;
+}
+
+thead {
+    display: inline-block;
+    width: 100%;
+}
+
+tbody {
+    height: 45rem;
+    display: inline-block;
+    width: 100%;
+    overflow: auto;
+
+    &::-webkit-scrollbar {
+        width: 0.5rem;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--green-300);
+        border-radius: var(--radius);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--green-400);
+        border-radius: var(--radius);
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--green-400);
+    }
+}
+
+#graphTab .card-body {
+    min-height: 68vh;
+    max-height: 68vh;
+    align-items: center;
+}
+
+.toStyleTheButtonOnTheDataPage {
+    background-color: transparent;
+}
+
+/* === Video Page Stuff === */
+.vlc {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.v, .l {
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    padding: 0;
+
+    & h3 {
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    & div span {
+        position: absolute;
+        top: 0.5rem;
+        right: 1rem;
+        color: firebrick;
+        font-weight: bolder;
+        font-size: 1.2rem;
+    }
+}
+
+.v {
+    flex: 1 0;
+    margin-left: 1rem;
+    height: 80vh;
+
+    & div, & div video {
+        height: 100%;
+    }
+}
+
+.l {
+    margin-right: 1rem;
+    padding: 1rem;
+}
+
+#rname {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    color: white;
+    font-weight: bolder;
+    font-size: 1.2rem;
+}
+
+#lstatus {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    color: firebrick;
+    font-weight: bolder;
+    font-size: 1.2rem;
+}

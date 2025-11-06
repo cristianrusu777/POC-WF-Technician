@@ -157,6 +157,16 @@ window.view = function(name) {
   window.location = "./camera-tech.html";
 }
 
+// Focus camera on the map and open its popup
+window.focusCamera = function(name){
+  const cam = techCameras.find(x=>x.name===name);
+  if (!cam || !cam.marker || !window.techMap) return;
+  try {
+    window.techMap.setView([cam.lat, cam.lng], 8);
+    cam.marker.openPopup();
+  } catch {}
+};
+
 // Delay init until DOM is ready so elements exist
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => { init(); bindUI(); });
@@ -191,13 +201,13 @@ function initializeMap() {
 
 // Admin table renderer (for Manage Cameras modal)
 function renderAdminTable(){
-  const body = document.getElementById('adminCamBody');
+  const body = document.querySelector('#adminCamBody');
   if (!body) return;
   body.innerHTML = '';
   // Merge all cameras for listing
   const customs = loadCustomCams();
   const deleted = loadDeletedCams();
-  const q = (document.getElementById('adminCamSearch')?.value || '').toLowerCase();
+  const q = (document.querySelector('#adminCamSearch')?.value || '').toLowerCase();
   let all = [
     ...DataFetcher.cameras.map(c=>({ name:c.name, lat:c.lat, lng:c.lng, custom:false })),
     ...customs.map(c=>({ name:c.name, lat:Number(c.lat), lng:Number(c.lng), custom:true, createdAt: Number(c.createdAt||0) }))
@@ -242,17 +252,28 @@ function renderAdminTable(){
       <td>${c.custom ? 'Custom' : 'Base'}</td>
       <td>
         <div class="d-flex align-items-center gap-1 flex-wrap">
-          <select class="form-select form-select-sm" data-role="status">
+          <select class="form-select form-select-sm status-select-tech" data-role="status">
             <option value="" ${effStatus=== (camObj?.status||'') ? 'selected' : ''}>Default</option>
             <option value="online" ${effStatus==='online' ? 'selected' : ''}>online</option>
             <option value="degraded" ${effStatus==='degraded' ? 'selected' : ''}>degraded</option>
             <option value="offline" ${effStatus==='offline' ? 'selected' : ''}>offline</option>
           </select>
-          <button class="btn btn-sm btn-outline-primary" data-act="apply">Apply</button>
-          <button class="btn btn-sm btn-outline-secondary" data-act="focus">Focus</button>
-          <button class="btn btn-sm btn-outline-danger" data-act="del">Delete</button>
+          <button class="btn btn-sm btn-tech" data-act="apply">Apply</button>
+          <button class="btn btn-sm btn-secondary-tech" data-act="focus">Focus</button>
+          <button class="btn btn-sm btn-danger-tech" data-act="del">Delete</button>
         </div>
       </td>`;
+    // apply status color to select
+    const statusSel = tr.querySelector('select[data-role="status"]');
+    const applyStatusClass = ()=>{
+      statusSel.classList.remove('status-online-select','status-degraded-select','status-offline-select');
+      const v = statusSel.value || (camObj?.status||'');
+      if (v==='online') statusSel.classList.add('status-online-select');
+      else if (v==='degraded') statusSel.classList.add('status-degraded-select');
+      else if (v==='offline') statusSel.classList.add('status-offline-select');
+    };
+    applyStatusClass();
+    statusSel.addEventListener('change', applyStatusClass);
     // Apply status override
     tr.querySelector('[data-act="apply"]').addEventListener('click', ()=>{
       const sel = tr.querySelector('select[data-role="status"]');
@@ -313,11 +334,11 @@ function createMarker(c){
         <div style="min-width: 220px">
           <strong>${c.name}</strong><br>
           <small>${c.region}</small><br>
-          <span class="status-badge ${statusClass}">${ds}</span><br>
           <div class="kv-grid" style="margin-top:.25rem;">
             <span class="kv kv-compact"><span class="kv-label">BR</span> <span class="${metricClass('bitrate', c.bitrateMbps)}">${c.bitrateMbps}</span> Mbps</span>
             <span class="kv kv-compact"><span class="kv-label">Temp</span> <span class="${metricClass('temp', c.temperatureC)}">${c.temperatureC}</span>°C</span>
             <span class="kv kv-compact"><span class="kv-label">Disk</span> <span class="${metricClass('storage', c.storageUsed)}">${c.storageUsed}</span>%</span>
+            <span class="status-badge ${statusClass}">${ds}</span>
           </div>
           <div class="action-row" style="margin-top:0.5rem;">
             <button class="vbutton ${isBookmarked ? 'bookmarked' : ''}" onclick="view('${c.name}')">👁️ View</button>
@@ -457,17 +478,17 @@ function bindUI(){
 
   // Admin modal
   const adminBtn = document.querySelector('#openAdminBtn');
-  const adminModalEl = document.getElementById('adminCamsModal');
+  const adminModalEl = document.querySelector('#adminCamsModal');
   if (adminBtn && adminModalEl){
     // eslint-disable-next-line no-undef
     const adminModal = new bootstrap.Modal(adminModalEl);
     adminBtn.addEventListener('click', ()=>{ renderAdminTable(); adminModal.show(); });
-    const form = document.getElementById('adminCamForm');
+    const form = document.querySelector('#adminCamForm');
     form?.addEventListener('submit', (e)=>{
       e.preventDefault();
-      const name = document.getElementById('admName').value.trim();
-      const lat = parseFloat(document.getElementById('admLat').value);
-      const lng = parseFloat(document.getElementById('admLng').value);
+      const name = document.querySelector('#admName').value.trim();
+      const lat = parseFloat(document.querySelector('#admLat').value);
+      const lng = parseFloat(document.querySelector('#admLng').value);
       if (!name || Number.isNaN(lat) || Number.isNaN(lng)) return;
       const res = addCustomCam({ name, lat, lng });
       if (res.ok){
@@ -478,25 +499,25 @@ function bindUI(){
       }
     });
     // Admin search binding
-    document.getElementById('adminCamSearch')?.addEventListener('input', renderAdminTable);
+    document.querySelector('#adminCamSearch')?.addEventListener('input', renderAdminTable);
   }
 }
 
 // ===== Camera Wall (Modal variant using Bootstrap) =====
 function openWallModal() {
-  const modalEl = document.getElementById('cameraWallModal');
+  const modalEl = document.querySelector('#cameraWallModal');
   if (!modalEl) return;
   // eslint-disable-next-line no-undef
   const modal = new bootstrap.Modal(modalEl);
   modal.show();
   renderModalWallGrid();
 
-  const cols = document.getElementById('mwCols');
-  const crit = document.getElementById('mwCriticalFirst');
-  const search = document.getElementById('mwSearch');
-  const status = document.getElementById('mwStatus');
-  const region = document.getElementById('mwRegion');
-  const book = document.getElementById('mwBookmarkedOnly');
+  const cols = document.querySelector('#mwCols');
+  const crit = document.querySelector('#mwCriticalFirst');
+  const search = document.querySelector('#mwSearch');
+  const status = document.querySelector('#mwStatus');
+  const region = document.querySelector('#mwRegion');
+  const book = document.querySelector('#mwBookmarkedOnly');
   cols?.addEventListener('input', renderModalWallGrid);
   crit?.addEventListener('change', renderModalWallGrid);
   search?.addEventListener('input', renderModalWallGrid);
@@ -507,7 +528,7 @@ function openWallModal() {
   // Clean up any lingering overlay/backdrop when modal closes
   modalEl.addEventListener('hidden.bs.modal', () => {
     // Hide custom overlay if any
-    const overlay = document.getElementById('cameraWall');
+    const overlay = document.querySelector('#cameraWall');
     if (overlay) overlay.style.display = 'none';
     // Remove any bootstrap backdrops left behind
     document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
@@ -518,18 +539,18 @@ function openWallModal() {
 }
 
 function renderModalWallGrid() {
-  const grid = document.getElementById('mwGrid');
+  const grid = document.querySelector('#mwGrid');
   if (!grid) return;
-  const cols = Number(document.getElementById('mwCols')?.value || 3);
-  const critical = !!document.getElementById('mwCriticalFirst')?.checked;
+  const cols = Number(document.querySelector('#mwCols')?.value || 3);
+  const critical = !!document.querySelector('#mwCriticalFirst')?.checked;
   const colMap = {2:'col-6',3:'col-4',4:'col-3',5:'col-xxl-2 col-lg-3 col-4',6:'col-2'};
   let cams = [...techCameras];
   if (critical) cams.sort((a,b)=> wallSeverity(b) - wallSeverity(a));
   // Filters
-  const q = (document.getElementById('mwSearch')?.value || '').toLowerCase();
-  const st = document.getElementById('mwStatus')?.value || '';
-  const rg = document.getElementById('mwRegion')?.value || '';
-  const onlyBook = !!document.getElementById('mwBookmarkedOnly')?.checked;
+  const q = (document.querySelector('#mwSearch')?.value || '').toLowerCase();
+  const st = document.querySelector('#mwStatus')?.value || '';
+  const rg = document.querySelector('#mwRegion')?.value || '';
+  const onlyBook = !!document.querySelector('#mwBookmarkedOnly')?.checked;
   const deleted = loadDeletedCams();
   cams = cams.filter(c => {
     if (deleted.has(c.name)) return false;
@@ -609,33 +630,31 @@ function filteredCameras() {
     return s;
   };
 
+  const createdMap = Object.fromEntries((loadCustomCams()||[]).map(c=>[c.name, Number(c.createdAt||0)]));
   return cams.sort((a, b) => {
     if (criticalFirst) {
       const sd = severity(b) - severity(a);
       if (sd !== 0) return sd;
     }
-    // Custom cameras first
+    // 1) Bookmarked cameras at top
+    const aBook = bookmarked.has(a.name);
+    const bBook = bookmarked.has(b.name);
+    if (aBook !== bBook) return aBook ? -1 : 1;
+    // 2) New/custom cameras above others (newest first)
     const aCust = !!a.custom, bCust = !!b.custom;
-    if (aCust && !bCust) return -1;
-    if (!aCust && bCust) return 1;
+    if (aCust !== bCust) return aCust ? -1 : 1;
     if (aCust && bCust) {
-      // When both custom, newest first using createdAt from localStorage
-      const createdMap = Object.fromEntries((loadCustomCams()||[]).map(c=>[c.name, Number(c.createdAt||0)]));
       const ac = createdMap[a.name] || 0;
       const bc = createdMap[b.name] || 0;
       if (bc !== ac) return bc - ac;
     }
-    // Keep bookmarked priority next
-    const aBook = bookmarked.has(a.name);
-    const bBook = bookmarked.has(b.name);
-    if (aBook && !bBook) return -1;
-    if (!aBook && bBook) return 1;
+    // 3) Name
     return a.name.localeCompare(b.name);
   });
 }
 
 function renderList() {
-  const list = document.getElementById("techCameraList");
+  const list = document.querySelector("#techCameraList");
   if (!list) return;
   list.innerHTML = '';
   const cams = filteredCameras();
@@ -652,7 +671,7 @@ function renderList() {
     li.innerHTML = `
       <div class="d-flex w-100 justify-content-between align-items-start">
         <div class="tech-item-content flex-grow-1 pe-2">
-          <div class="fw-semibold">${c.name}</div>
+          <div class="fw-semibold" style="cursor:pointer" onclick="focusCamera('${c.name}')">${c.name}</div>
           <div class="small kv-grid mt-1">
             <span class="kv kv-compact"><span class="kv-label">BR</span> <span class="${metricClass('bitrate', c.bitrateMbps)}">${c.bitrateMbps}</span> Mbps</span>
             <span class="kv kv-compact"><span class="kv-label">Disk</span> <span class="${metricClass('storage', c.storageUsed)}">${c.storageUsed}</span>%</span>

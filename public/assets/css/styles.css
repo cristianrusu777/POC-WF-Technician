@@ -29,6 +29,7 @@
 .kv { display: inline-flex; align-items: center; gap: 0.05rem; padding: 0.1rem 0.6rem; background: #f6f8fa; border-radius: 999px; border: 1px solid #d7dde5; color: #334155; font-size: 0.82rem; }
 .kv .kv-label { font-weight: 800; color: #0f172a; text-transform: uppercase; font-size: 0.72rem; letter-spacing: .02em; }
 /* Compact layout: smaller pills and two per row */
+.kv-grid { display: flex; flex-wrap: wrap; gap: 0.2rem; }
 .kv-compact { padding: 0.03rem 0.4rem; font-size: 0.7rem; }
 .kv-compact .kv-label { font-size: 0.64rem; }
 .kv-grid .kv-compact { flex: 0 1 calc(50% - 0.25rem); }
@@ -539,6 +540,7 @@ tbody {
     display: flex;
     gap: 0.1rem;
     align-items: center;
+    margin-top: 10%;
 }
 
 /* Technician action buttons (restart/update/diagnose) */
@@ -551,6 +553,35 @@ tbody {
 .btn-tech:hover {
     background-color: var(--green-400);
 }
+
+/* Manage Cameras (Admin) modal: secondary and danger variants aligned to theme */
+.btn-secondary-tech {
+    color: var(--gray-900);
+    background-color: var(--green-200);
+    border: none;
+    border-radius: var(--radius);
+}
+.btn-secondary-tech:hover {
+    background-color: var(--green-300);
+}
+
+.btn-danger-tech {
+    color: #7f1d1d;
+    background-color: #fecaca; /* red-200 */
+    border: none;
+    border-radius: var(--radius);
+}
+.btn-danger-tech:hover {
+    background-color: #fca5a5; /* red-300 */
+}
+
+/* Status select colors inside Manage Cameras */
+.status-select-tech {
+    min-width: 9rem;
+}
+.status-online-select { background: #d1fae5 !important; color: #065f46 !important; }
+.status-degraded-select { background: #fef3c7 !important; color: #92400e !important; }
+.status-offline-select { background: #fee2e2 !important; color: #991b1b !important; }
 
 /* Technician UI: metric severity styles */
 .metric { font-weight: 600; padding: 0.05rem 0.35rem; border-radius: 0.35rem; font-size: 0.85rem; }
