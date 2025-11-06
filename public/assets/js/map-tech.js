@@ -5,6 +5,12 @@ import { defaultIcon, goldIcon } from "./config.js";
 if (localStorage.getItem('role') !== 'technician') {
   window.location = './authentication.html';
 }
+function loadDeletedCams(){
+  try { return new Set(JSON.parse(localStorage.getItem('deletedCameras')||'[]')); } catch { return new Set(); }
+}
+function saveDeletedCams(set){
+  localStorage.setItem('deletedCameras', JSON.stringify([...set]));
+}
 
 // Persist bookmarked cameras similar to user map
 const bookmarked = new Set(JSON.parse(localStorage.getItem('bookmarkedCameras') || '[]'));
@@ -154,11 +160,13 @@ function initializeMap() {
   window.techMap = map;
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: '© OpenStreetMap contributors' }).addTo(map);
 
-  techCameras.forEach(createMarker);
+  const deleted = loadDeletedCams();
+  techCameras.filter(c=>!deleted.has(c.name)).forEach(createMarker);
 
   // Load and add custom cameras from storage
   loadCustomCams().forEach(({name, lat, lng})=>{
     if (techCameras.find(c=>c.name===name)) return;
+    if (deleted.has(name)) return;
     const c = makeTechCamera({ name, lat:Number(lat), lng:Number(lng) });
     c.custom = true;
     techCameras.push(c);
@@ -173,10 +181,19 @@ function renderAdminTable(){
   body.innerHTML = '';
   // Merge all cameras for listing
   const customs = loadCustomCams();
-  const all = [
+  const deleted = loadDeletedCams();
+  let all = [
     ...DataFetcher.cameras.map(c=>({ name:c.name, lat:c.lat, lng:c.lng, custom:false })),
     ...customs.map(c=>({ name:c.name, lat:Number(c.lat), lng:Number(c.lng), custom:true }))
   ];
+  // Exclude deleted
+  all = all.filter(x=> !deleted.has(x.name));
+  // Custom cameras first, then alphabetical
+  all.sort((a,b)=>{
+    if (a.custom && !b.custom) return -1;
+    if (!a.custom && b.custom) return 1;
+    return a.name.localeCompare(b.name);
+  });
   if (all.length === 0){
     const tr = document.createElement('tr');
     tr.innerHTML = '<td colspan="5" class="text-center text-muted">No cameras.</td>';
@@ -185,15 +202,35 @@ function renderAdminTable(){
   }
   all.forEach(c => {
     const tr = document.createElement('tr');
+    // Determine effective status via techCameras list and overrides
+    const camObj = techCameras.find(t=>t.name===c.name);
+    const effStatus = camObj ? getDisplayStatus(camObj) : 'online';
     tr.innerHTML = `
       <td>${c.name}</td>
       <td>${c.lat}</td>
       <td>${c.lng}</td>
       <td>${c.custom ? 'Custom' : 'Base'}</td>
       <td>
-        <button class="btn btn-sm btn-outline-secondary me-1" data-act="focus">Focus</button>
-        <button class="btn btn-sm btn-outline-danger" data-act="del" ${c.custom ? '' : 'disabled title="Only custom cameras can be deleted"'}>Delete</button>
+        <div class="d-flex align-items-center gap-1 flex-wrap">
+          <select class="form-select form-select-sm" data-role="status">
+            <option value="" ${effStatus=== (camObj?.status||'') ? 'selected' : ''}>Default</option>
+            <option value="online" ${effStatus==='online' ? 'selected' : ''}>online</option>
+            <option value="degraded" ${effStatus==='degraded' ? 'selected' : ''}>degraded</option>
+            <option value="offline" ${effStatus==='offline' ? 'selected' : ''}>offline</option>
+          </select>
+          <button class="btn btn-sm btn-outline-primary" data-act="apply">Apply</button>
+          <button class="btn btn-sm btn-outline-secondary" data-act="focus">Focus</button>
+          <button class="btn btn-sm btn-outline-danger" data-act="del">Delete</button>
+        </div>
       </td>`;
+    // Apply status override
+    tr.querySelector('[data-act="apply"]').addEventListener('click', ()=>{
+      const sel = tr.querySelector('select[data-role="status"]');
+      const v = sel.value;
+      saveStatusOverride(c.name, v);
+      // Optionally refresh walls/list quickly
+      renderList();
+    });
     tr.querySelector('[data-act="focus"]').addEventListener('click', ()=>{
       const cam = techCameras.find(x=>x.name===c.name);
       const modalEl = document.getElementById('adminCamsModal');
@@ -209,11 +246,18 @@ function renderAdminTable(){
     });
     const delBtn = tr.querySelector('[data-act="del"]');
     delBtn?.addEventListener('click', ()=>{
-      if (!c.custom) return;
-      if (confirm('Delete camera '+c.name+'?')){
-        deleteCustomCam(c.name);
-        renderAdminTable();
-      }
+      const cam = techCameras.find(x=>x.name===c.name);
+      const ds = cam ? getDisplayStatus(cam) : 'online';
+      if (ds !== 'offline') { alert('Camera must be offline to delete'); return; }
+      if (!confirm('Delete camera '+c.name+'?')) return;
+      // If custom, remove from custom set
+      if (c.custom) deleteCustomCam(c.name);
+      // Soft delete across app
+      const delSet = loadDeletedCams();
+      delSet.add(c.name);
+      saveDeletedCams(delSet);
+      renderAdminTable();
+      renderList();
     });
     body.appendChild(tr);
   });
@@ -456,7 +500,9 @@ function filteredCameras() {
   const onlyBook = document.querySelector("#onlyBookmarked")?.checked;
   const criticalFirst = document.querySelector("#criticalFirst")?.checked;
 
+  const deleted = loadDeletedCams();
   const cams = techCameras.filter(c => {
+    if (deleted.has(c.name)) return false;
     if (q && !c.name.toLowerCase().includes(q)) return false;
     if (status && c.status !== status) return false;
     if (region && c.region !== region) return false;
@@ -480,6 +526,10 @@ function filteredCameras() {
       const sd = severity(b) - severity(a);
       if (sd !== 0) return sd;
     }
+    // Custom cameras first
+    const aCust = !!a.custom, bCust = !!b.custom;
+    if (aCust && !bCust) return -1;
+    if (!aCust && bCust) return 1;
     // Keep bookmarked priority next
     const aBook = bookmarked.has(a.name);
     const bBook = bookmarked.has(b.name);

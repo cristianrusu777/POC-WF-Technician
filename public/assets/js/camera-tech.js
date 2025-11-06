@@ -59,6 +59,13 @@ function deleteCustomCam(name){
   saveCustomCams(list);
 }
 
+function loadDeletedCams(){
+  try { return new Set(JSON.parse(localStorage.getItem('deletedCameras')||'[]')); } catch { return new Set(); }
+}
+function saveDeletedCams(set){
+  localStorage.setItem('deletedCameras', JSON.stringify([...set]));
+}
+
 function loadStatusOverrides(){
   try { return JSON.parse(localStorage.getItem('statusOverrides')||'{}'); } catch { return {}; }
 }
@@ -129,23 +136,38 @@ function init() {
     if (newStatus === "online") $status.classList.add("status-online");
     else if (newStatus === "degraded") $status.classList.add("status-degraded");
     else $status.classList.add("status-offline");
-    alert('Status updated for '+rname+(v?` → ${v}`:' (system default)'));
+    // Update Delete button availability: only when offline
+    const $del = document.querySelector('#btnDeleteCam');
+    if (newStatus === 'offline') {
+      $del.disabled = false;
+      $del.title = '';
+    } else {
+      $del.disabled = true;
+      $del.title = 'Camera must be offline to delete';
+    }
   });
 
-  // Delete custom camera (only if custom)
+  // Delete camera (only when offline). Base cams are soft-deleted via localStorage so they disappear across the app.
   const $del = document.querySelector('#btnDeleteCam');
-  const custom = isCustomCamera(rname);
-  if (custom) {
+  const isOffline = (d.status === 'offline');
+  if (isOffline) {
     $del.disabled = false;
     $del.title = '';
+  } else {
+    $del.disabled = true;
+    $del.title = 'Camera must be offline to delete';
   }
-  $del.addEventListener('click', ()=>{
-    if (!custom) return;
-    if (confirm('Delete camera '+rname+'?')){
-      deleteCustomCam(rname);
-      // Navigate back to map (list will update on load)
-      window.location = './map-tech.html';
-    }
+  $del.addEventListener('click', () =>{
+    if (d.status !== 'offline') return;
+    if (!confirm('Delete camera '+rname+'?')) return;
+    // If custom, remove from the custom list
+    if (isCustomCamera(rname)) deleteCustomCam(rname);
+    // Mark as deleted globally so it disappears in map/list/wall
+    const deleted = loadDeletedCams();
+    deleted.add(rname);
+    saveDeletedCams(deleted);
+    // Navigate back to map (list will update on load)
+    window.location = './map-tech.html';
   });
 }
 
