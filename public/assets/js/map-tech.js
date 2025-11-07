@@ -285,6 +285,28 @@ window.focusCamera = function(name){
   } catch {}
 };
 
+// Open Manage Cameras and focus the rename input for the specified camera
+window.openRenameFor = function(name){
+  const modalEl = document.getElementById('adminCamsModal');
+  if (!modalEl) return;
+  // Render table fresh, show modal, then focus the matching input
+  try { renderAdminTable(); renderUnassignedList(); } catch {}
+  try { bootstrap.Modal.getOrCreateInstance(modalEl).show(); } catch {}
+  setTimeout(()=>{
+    // Try to find exact match
+    let input = Array.from(document.querySelectorAll('#adminCamBody input[data-role="rename"]'))
+      .find(el => el.value === name);
+    // If not found (e.g., due to filtering), try filtering by search
+    if (!input){
+      const search = document.querySelector('#adminCamSearch');
+      if (search){ search.value = name; renderAdminTable(); }
+      input = Array.from(document.querySelectorAll('#adminCamBody input[data-role="rename"]'))
+        .find(el => el.value === name);
+    }
+    if (input){ input.focus(); input.select(); try { input.scrollIntoView({ behavior:'smooth', block:'center' }); } catch {} }
+  }, 150);
+};
+
 // Delay init until DOM is ready so elements exist
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => { init(); bindUI(); });
@@ -483,39 +505,7 @@ function renderAdminTable(){
     body.appendChild(tr);
   });
 
-  // Append unassigned devices after cameras
-  const __devices = (loadDevices()||[]);
-  __devices.forEach(dev=>{
-    const dtr = document.createElement('tr');
-    const region = regionFromLatLng(dev.lat, dev.lng);
-    dtr.innerHTML = `
-      <td><em>Unassigned device</em></td>
-      <td>${dev.lat}</td>
-      <td>${dev.lng}</td>
-      <td>${region}</td>
-      <td>
-        <div class="d-flex align-items-center gap-1 flex-wrap">
-          <button class="btn btn-sm btn-tech" data-act="assign">Assign</button>
-          <button class="btn btn-sm btn-secondary-tech" data-act="focus">Focus</button>
-        </div>
-      </td>`;
-    dtr.querySelector('[data-act="assign"]').addEventListener('click', ()=>{
-      // Prefill coords, set pending, open modal; submission will perform assignment
-      const latEl = document.querySelector('#admLat');
-      const lngEl = document.querySelector('#admLng');
-      if (latEl) latEl.value = Number(dev.lat).toFixed(6);
-      if (lngEl) lngEl.value = Number(dev.lng).toFixed(6);
-      window.__pendingDevice = { lat: dev.lat, lng: dev.lng };
-      const modalEl = document.getElementById('adminCamsModal');
-      try { bootstrap.Modal.getOrCreateInstance(modalEl).show(); } catch {}
-      setTimeout(()=> document.querySelector('#admName')?.focus(), 100);
-    });
-    dtr.querySelector('[data-act="focus"]').addEventListener('click', ()=>{
-      try { bootstrap.Modal.getOrCreateInstance(document.getElementById('adminCamsModal')).hide(); } catch {}
-      setTimeout(()=>{ window.techMap.setView([dev.lat, dev.lng], 8); }, 150);
-    });
-    body.appendChild(dtr);
-  });
+  // Do not append unassigned devices here; they are listed in the Unassigned devices section above.
 
   // Hook up sortable headers
   const thead = body.closest('table')?.querySelector('thead');
@@ -548,6 +538,7 @@ function createMarker(c){
           <div class="action-row" style="margin-top:0.5rem;">
             <button class="vbutton ${isBookmarked ? 'bookmarked' : ''}" onclick="view('${c.name}')">👁️ View</button>
             <button class="vbutton ${isBookmarked ? 'bookmarked' : ''}" onclick="toggleBookmark('${c.name}')">${isBookmarked ? 'Bookmarked' : 'Bookmark'}</button>
+            <button class="btn-tech" onclick="openRenameFor('${c.name}')">Rename</button>
           </div>
         </div>`;
     });
