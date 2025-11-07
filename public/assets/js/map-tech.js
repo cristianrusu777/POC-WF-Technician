@@ -291,25 +291,38 @@ window.openRenameFor = function(name){
   if (!modalEl) return;
   // Render table fresh, show modal, then focus the matching input
   try { renderAdminTable(); renderUnassignedList(); } catch {}
-  try { bootstrap.Modal.getOrCreateInstance(modalEl).show(); } catch {}
-  setTimeout(()=>{
-    // Try to find exact match
-    let input = Array.from(document.querySelectorAll('#adminCamBody input[data-role="rename"]'))
-      .find(el => el.value === name);
-    // If not found (e.g., due to filtering), try filtering by search
-    if (!input){
-      const search = document.querySelector('#adminCamSearch');
-      if (search){ search.value = name; renderAdminTable(); }
-      input = Array.from(document.querySelectorAll('#adminCamBody input[data-role="rename"]'))
+  try {
+    const bs = bootstrap.Modal.getOrCreateInstance(modalEl);
+    // Wait for modal animation to finish for reliable focus
+    const handler = () => {
+      // First try direct match
+      let input = Array.from(document.querySelectorAll('#adminCamBody input[data-role="rename"]'))
         .find(el => el.value === name);
-    }
-    if (input){
-      input.classList.add('rename-target');
-      input.focus(); input.select();
-      try { input.scrollIntoView({ behavior:'smooth', block:'center' }); } catch {}
-      setTimeout(()=> input.classList.remove('rename-target'), 2000);
-    }
-  }, 150);
+      if (!input){
+        // Reset search and try again
+        const search = document.querySelector('#adminCamSearch');
+        if (search){ search.value = ''; renderAdminTable(); }
+        input = Array.from(document.querySelectorAll('#adminCamBody input[data-role="rename"]'))
+          .find(el => el.value === name);
+      }
+      if (!input){
+        // Apply search to narrow and re-try
+        const search = document.querySelector('#adminCamSearch');
+        if (search){ search.value = name; renderAdminTable(); }
+        input = Array.from(document.querySelectorAll('#adminCamBody input[data-role="rename"]'))
+          .find(el => el.value === name);
+      }
+      if (input){
+        input.classList.add('rename-target');
+        input.focus(); input.select();
+        try { input.scrollIntoView({ behavior:'smooth', block:'center' }); } catch {}
+        input.addEventListener('blur', ()=> input.classList.remove('rename-target'), { once:true });
+      }
+      modalEl.removeEventListener('shown.bs.modal', handler);
+    };
+    modalEl.addEventListener('shown.bs.modal', handler);
+    bs.show();
+  } catch {}
 };
 
 // Delay init until DOM is ready so elements exist
@@ -433,7 +446,6 @@ function renderAdminTable(){
       <td>
         <div class="d-flex align-items-center gap-1 flex-wrap">
           <select class="form-select form-select-sm status-select-tech" data-role="status">
-            <option value="" ${effStatus=== (camObj?.status||'') ? 'selected' : ''}>Default</option>
             <option value="online" ${effStatus==='online' ? 'selected' : ''}>online</option>
             <option value="degraded" ${effStatus==='degraded' ? 'selected' : ''}>degraded</option>
             <option value="offline" ${effStatus==='offline' ? 'selected' : ''}>offline</option>
@@ -542,7 +554,7 @@ function createMarker(c){
           </div>
           <div class="action-row" style="margin-top:0.5rem;">
             <button class="btn-tech" onclick="view('${c.name}')">👁️ View</button>
-            <button class="btn-secondary-tech ${isBookmarked ? 'bookmarked' : ''}" onclick="toggleBookmark('${c.name}')">${isBookmarked ? 'Bookmarked' : 'Bookmark'}</button>
+            <button class="btn-tech" onclick="toggleBookmark('${c.name}')">${isBookmarked ? 'Bookmarked' : 'Bookmark'}</button>
             <button class="btn-tech" onclick="openRenameFor('${c.name}')">Rename</button>
           </div>
         </div>`;
@@ -707,7 +719,7 @@ function renderWallGrid({ cols = 3, critical = false } = {}) {
     const statusClass = ds === 'online' ? 'status-online' : (ds === 'degraded' ? 'status-degraded' : 'status-offline');
     tile.innerHTML = `
       <div class="tile-head">
-        <div class="fw-semibold">${c.name}</div>
+        <div class="fw-semibold wall-name" style="cursor:pointer;">${c.name}</div>
       </div>
       <div class="video-wrap">
         <video src="v.mp4" muted autoplay loop playsinline></video>
@@ -724,6 +736,12 @@ function renderWallGrid({ cols = 3, critical = false } = {}) {
       </div>
     `;
     grid.appendChild(tile);
+    // Click only on the name to go back to map and focus this camera
+    tile.querySelector('.wall-name')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      try { closeWall(); } catch {}
+      setTimeout(()=> focusCamera(c.name), 100);
+    });
   });
 }
 
@@ -866,7 +884,7 @@ function renderModalWallGrid() {
     div.innerHTML = `
       <div class="wall-tile h-100 d-flex flex-column">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <div class="fw-semibold small">${c.name}</div>
+          <div class="fw-semibold small wall-name" style="cursor:pointer;">${c.name}</div>
         </div>
         <div class="video-wrap mb-1">
           <video src="v.mp4" class="w-100" muted autoplay loop playsinline></video>
@@ -883,6 +901,16 @@ function renderModalWallGrid() {
         </div>
       </div>`;
     grid.appendChild(div);
+    // Clicking only the name redirects to map and focuses this camera
+    const nameEl = div.querySelector('.wall-name');
+    nameEl?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const modalEl = document.querySelector('#cameraWallModal');
+      if (modalEl){
+        try { bootstrap.Modal.getOrCreateInstance(modalEl).hide(); } catch {}
+      }
+      setTimeout(()=> focusCamera(c.name), 150);
+    });
   });
 }
 

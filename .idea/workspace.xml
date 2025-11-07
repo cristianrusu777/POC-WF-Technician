@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="Adds camera renaming and filtering">
-      <change beforePath="$PROJECT_DIR$/public/assets/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/styles.css" afterDir="false" />
+    <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="Improves UI for camera management: highlights rename inputs, updates button styles.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/assets/js/map-tech.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/js/map-tech.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -114,15 +114,7 @@
       <workItem from="1762436165131" duration="5840000" />
       <workItem from="1762445082707" duration="12012000" />
       <workItem from="1762495827218" duration="3333000" />
-      <workItem from="1762502051668" duration="4170000" />
-    </task>
-    <task id="LOCAL-00008" summary="Final: all works on map (now try to add bookmarks)">
-      <option name="closed" value="true" />
-      <created>1761211556296</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1761211556296</updated>
+      <workItem from="1762502051668" duration="4846000" />
     </task>
     <task id="LOCAL-00009" summary="Final: adds the bookmarks!">
       <option name="closed" value="true" />
@@ -508,7 +500,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762506090861</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="Improves UI for camera management: highlights rename inputs, updates button styles.">
+      <option name="closed" value="true" />
+      <created>1762506305991</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1762506305991</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -526,7 +526,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Final: makes region multiple type" />
     <MESSAGE value="Final: adds minutes to the filter" />
     <MESSAGE value="Final: small style improvement, but need to ask how to style forms nicely for final version (poc)" />
     <MESSAGE value="Final: adds search option for the species list" />
@@ -551,6 +550,7 @@
     <MESSAGE value="Refines UI components for device management, improves button usability, and enhances unassigned device handling." />
     <MESSAGE value="Adds camera renaming feature, enhances status filtering, and improves camera table rendering logic." />
     <MESSAGE value="Adds camera renaming and filtering" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adds camera renaming and filtering" />
+    <MESSAGE value="Improves UI for camera management: highlights rename inputs, updates button styles." />
+    <option name="LAST_COMMIT_MESSAGE" value="Improves UI for camera management: highlights rename inputs, updates button styles." />
   </component>
 </project>
