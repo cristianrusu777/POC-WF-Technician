@@ -6,6 +6,36 @@ if (localStorage.getItem('role') !== 'technician') {
   window.location = './authentication.html';
 }
 
+function renameCamera(oldName, newName){
+  newName = String(newName||'').trim();
+  if (!newName) return { ok:false, msg:'Name cannot be empty' };
+  if (oldName === newName) return { ok:true };
+  // collision check across current runtime names
+  if (techCameras.some(c=>c.name===newName)) return { ok:false, msg:'Name already exists' };
+  // Custom path
+  const isCustom = !!techCameras.find(c=>c.name===oldName && c.custom);
+  if (isCustom){ return renameCustomCam(oldName, newName); }
+  // Base camera: persist override
+  const ov = loadNameOverrides();
+  ov[oldName] = newName;
+  saveNameOverrides(ov);
+  const cam = techCameras.find(c=>c.name===oldName && !c.custom);
+  if (!cam) return { ok:false, msg:'Camera not found' };
+  cam.name = newName;
+  // move status overrides
+  const so = loadStatusOverrides();
+  if (Object.prototype.hasOwnProperty.call(so, oldName)){
+    so[newName] = so[oldName];
+    delete so[oldName];
+    localStorage.setItem('statusOverrides', JSON.stringify(so));
+  }
+  // bookmarks
+  if (bookmarked.has(oldName)) { bookmarked.delete(oldName); bookmarked.add(newName); localStorage.setItem('bookmarkedCameras', JSON.stringify([...bookmarked])); }
+  // update marker popup later when opened; icon remains the same
+  renderList();
+  return { ok:true };
+}
+
 function regionClassName(region){
   const slug = String(region||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
   return `region-${slug || 'unknown'}`;
@@ -91,6 +121,14 @@ function makeTechCamera(c) {
 
 const techCameras = DataFetcher.cameras.map(makeTechCamera);
 
+// ===== Name overrides (for base cameras) =====
+function loadNameOverrides(){
+  try { return JSON.parse(localStorage.getItem('nameOverrides')||'{}'); } catch { return {}; }
+}
+function saveNameOverrides(obj){
+  localStorage.setItem('nameOverrides', JSON.stringify(obj||{}));
+}
+
 // ===== Admin (beheerder) custom cameras management =====
 let adminSort = { key: null, dir: 'asc' };
 function loadStatusOverrides(){
@@ -111,9 +149,36 @@ function loadCustomCams(){
 function saveCustomCams(list){
   localStorage.setItem('adminCustomCameras', JSON.stringify(list));
 }
+
+// Prefer custom cameras over base when deduping; for customs, pick newest createdAt
+function dedupeTechCameras(){
+  const createdMap = Object.fromEntries((loadCustomCams()||[]).map(c=>[c.name, Number(c.createdAt||0)]));
+  const byName = new Map();
+  for (const cam of techCameras){
+    const existing = byName.get(cam.name);
+    if (!existing){ byName.set(cam.name, cam); continue; }
+    const aIsCustom = !!existing.custom; const bIsCustom = !!cam.custom;
+    if (aIsCustom !== bIsCustom){
+      byName.set(cam.name, bIsCustom ? cam : existing);
+      continue;
+    }
+    // both same custom flag; if custom, pick newest by createdAt; else keep first
+    if (aIsCustom){
+      const aCreated = createdMap[existing.name] || 0;
+      const bCreated = createdMap[cam.name] || 0;
+      byName.set(cam.name, bCreated >= aCreated ? cam : existing);
+    }
+  }
+  // Replace array in place to keep references where possible
+  techCameras.length = 0;
+  for (const cam of byName.values()) techCameras.push(cam);
+}
 function addCustomCam({name, lat, lng}){
   const customs = loadCustomCams();
+  // Block duplicates across base and custom names
+  if (DataFetcher.cameras.some(c=>c.name===name)) return { ok:false, msg:'Name already exists' };
   if (customs.find(c=>c.name===name)) return { ok:false, msg:'Name already exists' };
+  if (techCameras.some(c=>c.name===name)) return { ok:false, msg:'Name already exists' };
   customs.push({name, lat, lng, createdAt: Date.now()});
   saveCustomCams(customs);
   // Add to runtime
@@ -122,6 +187,8 @@ function addCustomCam({name, lat, lng}){
   techCameras.push(c);
   // Place marker if map exists
   if (window.techMap) createMarker(c);
+  // Deduplicate just in case
+  dedupeTechCameras();
   renderList();
   return { ok:true };
 }
@@ -149,6 +216,35 @@ function updateCustomCam(name, {lat, lng}){
     try { c.marker?.setLatLng([c.lat, c.lng]); } catch {}
   }
   renderList();
+}
+
+function renameCustomCam(oldName, newName){
+  newName = String(newName||'').trim();
+  if (!newName) return { ok:false, msg:'Name cannot be empty' };
+  if (oldName === newName) return { ok:true };
+  // collision check against base and custom
+  if (DataFetcher.cameras.some(c=>c.name===newName)) return { ok:false, msg:'Name already exists' };
+  const customs = loadCustomCams();
+  if (customs.some(c=>c.name===newName)) return { ok:false, msg:'Name already exists' };
+  const obj = customs.find(c=>c.name===oldName);
+  if (!obj) return { ok:false, msg:'Camera not found' };
+  obj.name = newName;
+  saveCustomCams(customs);
+  // update runtime camera
+  const cam = techCameras.find(c=>c.name===oldName && c.custom);
+  if (cam){ cam.name = newName; }
+  // move overrides
+  const ov = loadStatusOverrides();
+  if (Object.prototype.hasOwnProperty.call(ov, oldName)){
+    ov[newName] = ov[oldName];
+    delete ov[oldName];
+    localStorage.setItem('statusOverrides', JSON.stringify(ov));
+  }
+  // bookmarks
+  if (bookmarked.has(oldName)) { bookmarked.delete(oldName); bookmarked.add(newName); localStorage.setItem('bookmarkedCameras', JSON.stringify([...bookmarked])); }
+  dedupeTechCameras();
+  renderList();
+  return { ok:true };
 }
 
 window.toggleBookmark = function(name) {
@@ -199,6 +295,14 @@ if (document.readyState === 'loading') {
 function init() {
   initializeMap();
   attachFilters();
+  // Apply base camera name overrides to runtime list
+  const nov = loadNameOverrides();
+  Object.entries(nov).forEach(([oldName, newName])=>{
+    const cam = techCameras.find(c=>c.name===oldName && !c.custom);
+    if (cam) cam.name = newName;
+  });
+  // Dedupe any leftover duplicates by name (prefer custom entries)
+  dedupeTechCameras();
   renderList();
 }
 
@@ -247,19 +351,29 @@ function renderAdminTable(){
   const customs = loadCustomCams();
   const deleted = loadDeletedCams();
   const q = (document.querySelector('#adminCamSearch')?.value || '').toLowerCase();
+  const stFilter = (document.querySelector('#adminStatusFilter')?.value || '').toLowerCase();
   let all = [
-    ...DataFetcher.cameras.map(c=>({ name:c.name, lat:c.lat, lng:c.lng, custom:false })),
-    ...customs.map(c=>({ name:c.name, lat:Number(c.lat), lng:Number(c.lng), custom:true, createdAt: Number(c.createdAt||0) }))
+    ...techCameras.map(c=>({ name:c.name, lat:c.lat, lng:c.lng, custom:!!c.custom }))
   ];
   // Exclude deleted
   all = all.filter(x=> !deleted.has(x.name));
   // Apply search
   if (q) all = all.filter(x => x.name.toLowerCase().includes(q));
+  // Apply status filter
+  if (stFilter){
+    all = all.filter(x=>{
+      const camObj = techCameras.find(t=>t.name===x.name);
+      const eff = camObj ? getDisplayStatus(camObj) : 'online';
+      return eff === stFilter;
+    });
+  }
   // Sort according to adminSort or default (custom-first)
   if (adminSort.key) {
     const { key, dir } = adminSort;
     all.sort((a,b)=>{
-      let va = a[key]; let vb = b[key];
+      let va, vb;
+      if (key==='region') { va = regionFromLatLng(a.lat,a.lng); vb = regionFromLatLng(b.lat,b.lng); }
+      else { va = a[key]; vb = b[key]; }
       if (typeof va === 'string') { const r = va.localeCompare(String(vb)); return dir==='asc'? r : -r; }
       const diff = (Number(va)||0) - (Number(vb)||0);
       return dir==='asc' ? diff : -diff;
@@ -283,10 +397,12 @@ function renderAdminTable(){
     // Determine effective status via techCameras list and overrides
     const camObj = techCameras.find(t=>t.name===c.name);
     const effStatus = camObj ? getDisplayStatus(camObj) : 'online';
+    const region = camObj ? camObj.region : regionFromLatLng(c.lat, c.lng);
     tr.innerHTML = `
-      <td>${c.name}</td>
+      <td><input class="form-control form-control-sm" data-role="rename" value="${c.name}" /></td>
       <td>${c.lat}</td>
       <td>${c.lng}</td>
+      <td>${region}</td>
       <td>
         <div class="d-flex align-items-center gap-1 flex-wrap">
           <select class="form-select form-select-sm status-select-tech" data-role="status">
@@ -295,7 +411,6 @@ function renderAdminTable(){
             <option value="degraded" ${effStatus==='degraded' ? 'selected' : ''}>degraded</option>
             <option value="offline" ${effStatus==='offline' ? 'selected' : ''}>offline</option>
           </select>
-          <button class="btn btn-sm btn-tech" data-act="apply">Apply</button>
           <button class="btn btn-sm btn-secondary-tech" data-act="focus">Focus</button>
           <button class="btn btn-sm btn-danger-tech" data-act="del">Delete</button>
         </div>
@@ -310,14 +425,22 @@ function renderAdminTable(){
       else if (v==='offline') statusSel.classList.add('status-offline-select');
     };
     applyStatusClass();
-    statusSel.addEventListener('change', applyStatusClass);
-    // Apply status override
-    tr.querySelector('[data-act="apply"]').addEventListener('click', ()=>{
-      const sel = tr.querySelector('select[data-role="status"]');
-      const v = sel.value;
+    statusSel.addEventListener('change', ()=>{
+      applyStatusClass();
+      const v = statusSel.value;
       saveStatusOverride(c.name, v);
-      // Optionally refresh walls/list quickly
       renderList();
+    });
+    // Rename handler (all cams)
+    const rn = tr.querySelector('input[data-role="rename"]');
+    const oldName = c.name;
+    rn.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ rn.blur(); } });
+    rn.addEventListener('blur', ()=>{
+      const newName = rn.value.trim();
+      if (newName === oldName) return;
+      const res = renameCamera(oldName, newName);
+      if (!res.ok){ alert(res.msg||'Rename failed'); rn.value = oldName; return; }
+      renderAdminTable();
     });
     tr.querySelector('[data-act="focus"]').addEventListener('click', ()=>{
       const cam = techCameras.find(x=>x.name===c.name);
@@ -335,7 +458,9 @@ function renderAdminTable(){
     const delBtn = tr.querySelector('[data-act="del"]');
     delBtn?.addEventListener('click', ()=>{
       const cam = techCameras.find(x=>x.name===c.name);
-      const ds = cam ? getDisplayStatus(cam) : 'online';
+      // Re-evaluate status: prefer the row's selected value if provided, else effective status
+      const selVal = tr.querySelector('select[data-role="status"]')?.value || '';
+      const ds = selVal || (cam ? getDisplayStatus(cam) : 'online');
       if (ds !== 'offline') { alert('Camera must be offline to delete'); return; }
       if (!confirm('Delete camera '+c.name+'?')) return;
       // If custom, remove from custom set
@@ -362,10 +487,12 @@ function renderAdminTable(){
   const __devices = (loadDevices()||[]);
   __devices.forEach(dev=>{
     const dtr = document.createElement('tr');
+    const region = regionFromLatLng(dev.lat, dev.lng);
     dtr.innerHTML = `
       <td><em>Unassigned device</em></td>
       <td>${dev.lat}</td>
       <td>${dev.lng}</td>
+      <td>${region}</td>
       <td>
         <div class="d-flex align-items-center gap-1 flex-wrap">
           <button class="btn btn-sm btn-tech" data-act="assign">Assign</button>
@@ -466,13 +593,17 @@ function renderUnassignedList(){
   if (devs.length === 0){ wrap.innerHTML = '<div class="list-group-item text-muted">No unassigned devices</div>'; return; }
   wrap.innerHTML = '';
   devs.forEach((d, idx)=>{
-    const el = document.createElement('button');
-    el.type = 'button';
-    el.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
-    el.innerHTML = `<span>#${idx+1} · ${d.lat.toFixed?.(6) ?? d.lat}, ${d.lng.toFixed?.(6) ?? d.lng}</span><span class="badge bg-secondary">Select</span>`;
-    el.addEventListener('click', ()=>{
-      setPendingDevice(d.lat, d.lng);
-    });
+    const el = document.createElement('div');
+    el.className = 'list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2';
+    const region = regionFromLatLng(d.lat, d.lng);
+    el.innerHTML = `
+      <span>#${idx+1} · ${Number(d.lat).toFixed(6)}, ${Number(d.lng).toFixed(6)} · <em>${region}</em></span>
+      <span class="d-inline-flex gap-1">
+        <button class="btn btn-secondary-tech btn-xs" data-act="focus">Focus</button>
+        <button class="btn btn-tech btn-xs" data-act="select">Select</button>
+      </span>`;
+    el.querySelector('[data-act="select"]').addEventListener('click', (e)=>{ e.stopPropagation(); setPendingDevice(d.lat, d.lng); });
+    el.querySelector('[data-act="focus"]').addEventListener('click', (e)=>{ e.stopPropagation(); try { window.techMap.setView([d.lat, d.lng], 8); } catch {} });
     wrap.appendChild(el);
   });
 }
@@ -492,7 +623,13 @@ window.assignFromDevice = function(lat, lng){
   // Always prefill coords (readonly), set pending, and open the modal; user clicks Add to complete
   setPendingDevice(lat, lng);
   const modalEl = document.querySelector('#adminCamsModal');
-  if (modalEl){ try { bootstrap.Modal.getOrCreateInstance(modalEl).show(); } catch {} }
+  if (modalEl){
+    try {
+      renderAdminTable();
+      renderUnassignedList();
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    } catch {}
+  }
   setTimeout(()=> document.querySelector('#admName')?.focus(), 100);
 };
 
@@ -661,8 +798,9 @@ function bindUI(){
         alert(res.msg || 'Unable to assign camera');
       }
     });
-    // Admin search binding
+    // Admin search & status filter binding
     document.querySelector('#adminCamSearch')?.addEventListener('input', renderAdminTable);
+    document.querySelector('#adminStatusFilter')?.addEventListener('change', renderAdminTable);
   }
 }
 
@@ -776,7 +914,7 @@ function filteredCameras() {
   const cams = techCameras.filter(c => {
     if (deleted.has(c.name)) return false;
     if (q && !c.name.toLowerCase().includes(q)) return false;
-    if (status && c.status !== status) return false;
+    if (status && getDisplayStatus(c) !== status) return false;
     if (region && c.region !== region) return false;
     if (onlyBook && !bookmarked.has(c.name)) return false;
     return true;

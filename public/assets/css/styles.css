@@ -539,7 +539,6 @@ tbody {
 .action-row {
     display: flex;
     gap: 0.1rem;
-    align-items: center;
     margin-top: 10%;
 }
 
@@ -556,13 +555,13 @@ tbody {
 }
 .vbutton:hover { background-color: var(--green-400); }
 
-/* Ensure Leaflet popup buttons keep padding/style */
-.leaflet-popup-content .vbutton {
-  display: inline-block;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.9rem;
-  border-radius: var(--radius);
-}
+/* Gold state for bookmarked action buttons (tech list and tiles) */
+.vbutton.bookmarked { background-color: var(--accent-gold-300) !important; color: var(--gray-900) !important; }
+.vbutton.bookmarked:hover { background-color: var(--accent-gold-400) !important; color: var(--gray-900) !important; }
+/* Increase specificity inside action rows to beat any overrides */
+.action-row .vbutton.bookmarked { background-color: var(--accent-gold-300) !important; color: var(--gray-900) !important; }
+.action-row .vbutton.bookmarked:hover { background-color: var(--accent-gold-400) !important; color: var(--gray-900) !important; }
+
 
 /* Base tech buttons (used across Manage, Camera Wall, Apply, Restart) */
 .btn-tech {

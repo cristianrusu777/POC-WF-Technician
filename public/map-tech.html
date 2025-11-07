@@ -52,7 +52,13 @@
           <div id="unassignedList" class="list-group small"></div>
         </div>
         <hr/>
-        <div class="d-flex justify-content-end mb-2">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+          <select id="adminStatusFilter" class="form-select form-select-sm" style="max-width: 12rem;">
+            <option value="">All statuses</option>
+            <option value="online">online</option>
+            <option value="degraded">degraded</option>
+            <option value="offline">offline</option>
+          </select>
           <input id="adminCamSearch" class="form-control form-control-sm" placeholder="Search cameras" style="max-width: 16rem;">
         </div>
         <div class="table-responsive">
@@ -62,7 +68,8 @@
                 <th data-key="name" style="cursor:pointer;">Name</th>
                 <th data-key="lat" style="cursor:pointer;">Latitude</th>
                 <th data-key="lng" style="cursor:pointer;">Longitude</th>
-                <th style="width:240px;">Actions</th>
+                <th data-key="region" style="cursor:pointer;">Region</th>
+                <th style="width:260px;">Actions</th>
               </tr>
             </thead>
             <tbody id="adminCamBody"></tbody>
