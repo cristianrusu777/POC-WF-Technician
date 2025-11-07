@@ -1,5 +1,5 @@
 import * as DataFetcher from "./modules/DataFetcher.js";
-import { defaultIcon, goldIcon } from "./config.js";
+import { defaultIcon, goldIcon, greyIcon } from "./config.js";
 
 // Auth gate for technician pages
 if (localStorage.getItem('role') !== 'technician') {
@@ -15,6 +15,28 @@ function loadDeletedCams(){
 }
 function saveDeletedCams(set){
   localStorage.setItem('deletedCameras', JSON.stringify([...set]));
+}
+
+// ===== Unassigned physical devices (persisted in localStorage) =====
+function loadDevices(){
+  try { return JSON.parse(localStorage.getItem('unassignedDevices')||'[]'); } catch { return []; }
+}
+function saveDevices(list){
+  localStorage.setItem('unassignedDevices', JSON.stringify(list));
+}
+function addDevice({lat, lng}){
+  const list = loadDevices();
+  list.push({ id: Date.now()+"_"+Math.random().toString(36).slice(2), lat:Number(lat), lng:Number(lng) });
+  saveDevices(list);
+}
+function removeDeviceByCoords(lat, lng, eps=1e-6){
+  const list = loadDevices();
+  const idx = list.findIndex(d => Math.abs(d.lat-Number(lat))<eps && Math.abs(d.lng-Number(lng))<eps);
+  if (idx>=0){ list.splice(idx,1); saveDevices(list); return true; }
+  return false;
+}
+function hasDeviceAt(lat,lng, eps=1e-6){
+  return loadDevices().some(d=> Math.abs(d.lat-Number(lat))<eps && Math.abs(d.lng-Number(lng))<eps);
 }
 
 // Persist bookmarked cameras similar to user map
@@ -183,6 +205,8 @@ function init() {
 function initializeMap() {
   const map = L.map("map").setView([20, 10], 2);
   window.techMap = map;
+  // Track device markers so we can refresh safely
+  window.deviceMarkers = [];
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: '© OpenStreetMap contributors' }).addTo(map);
 
   const deleted = loadDeletedCams();
@@ -197,6 +221,9 @@ function initializeMap() {
     techCameras.push(c);
     createMarker(c);
   });
+
+  // Finally, render any unassigned device markers
+  refreshDeviceMarkers();
 }
 
 // Admin table renderer (for Manage Cameras modal)
@@ -307,6 +334,12 @@ function renderAdminTable(){
       const delSet = loadDeletedCams();
       delSet.add(c.name);
       saveDeletedCams(delSet);
+      // Convert to unassigned device at same location
+      if (cam){
+        addDevice({ lat: cam.lat, lng: cam.lng });
+        try { cam.marker?.remove(); } catch {}
+        refreshDeviceMarkers();
+      }
       renderAdminTable();
       renderList();
     });
@@ -347,6 +380,38 @@ function createMarker(c){
         </div>`;
     });
 }
+
+// Create grey markers for unassigned devices
+function createDeviceMarker(dev){
+  const m = L.marker([dev.lat, dev.lng], { icon: greyIcon })
+    .addTo(window.techMap)
+    .bindPopup(() => `
+      <div style="min-width: 220px">
+        <strong>Unassigned device</strong><br>
+        <small>${regionFromLatLng(dev.lat, dev.lng)}</small>
+        <div class="action-row" style="margin-top:0.5rem;">
+          <button class="vbutton" onclick="assignFromDevice(${dev.lat}, ${dev.lng})">Assign camera here</button>
+        </div>
+      </div>
+    `);
+  try { window.deviceMarkers.push(m); } catch {}
+}
+
+function refreshDeviceMarkers(){
+  try { (window.deviceMarkers||[]).forEach(m=>m.remove()); } catch {}
+  window.deviceMarkers = [];
+  (loadDevices()||[]).forEach(createDeviceMarker);
+}
+
+// Open Manage Cameras modal with coords prefilled
+window.assignFromDevice = function(lat, lng){
+  const latEl = document.querySelector('#admLat');
+  const lngEl = document.querySelector('#admLng');
+  if (latEl && lngEl){ latEl.value = Number(lat).toFixed(6); lngEl.value = Number(lng).toFixed(6); }
+  const modalEl = document.querySelector('#adminCamsModal');
+  if (modalEl){ try { bootstrap.Modal.getOrCreateInstance(modalEl).show(); } catch {} }
+  setTimeout(()=> document.querySelector('#admName')?.focus(), 100);
+};
 
 // ===== Camera Wall (Fullscreen overlay) =====
 let wallTickerInterval;
@@ -490,9 +555,17 @@ function bindUI(){
       const lat = parseFloat(document.querySelector('#admLat').value);
       const lng = parseFloat(document.querySelector('#admLng').value);
       if (!name || Number.isNaN(lat) || Number.isNaN(lng)) return;
+      // Enforce that a physical device exists at these coordinates
+      if (!hasDeviceAt(lat, lng)){
+        alert('Select a grey unassigned device on the map to add a camera.');
+        return;
+      }
       const res = addCustomCam({ name, lat, lng });
       if (res.ok){
         form.reset();
+        // Consume the device and refresh grey markers
+        removeDeviceByCoords(lat, lng);
+        refreshDeviceMarkers();
         renderAdminTable();
       } else {
         alert(res.msg || 'Unable to add camera');

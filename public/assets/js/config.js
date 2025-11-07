@@ -18,4 +18,15 @@ const goldIcon = new L.Icon({
     className: "marker-gold"
 });
 
-export { defaultIcon, goldIcon };
+// Grey icon for unassigned physical devices
+const greyIcon = new L.Icon({
+    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png",
+    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+    className: "marker-grey"
+});
+
+export { defaultIcon, goldIcon, greyIcon };
