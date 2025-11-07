@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="Add status-based sorting and clarify camera selection behavior" />
+    <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="Refine technician UI: update button styles, align alert and table themes with the green palette, and improve text-muted contrast.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/css/reset.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/reset.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/assets/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/styles.css" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -111,15 +115,7 @@
       <workItem from="1762436165131" duration="5840000" />
       <workItem from="1762445082707" duration="12012000" />
       <workItem from="1762495827218" duration="3333000" />
-      <workItem from="1762502051668" duration="6832000" />
-    </task>
-    <task id="LOCAL-00013" summary="Final: more style improvements">
-      <option name="closed" value="true" />
-      <created>1761218260431</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1761218260431</updated>
+      <workItem from="1762502051668" duration="7964000" />
     </task>
     <task id="LOCAL-00014" summary="Final: more style improvements">
       <option name="closed" value="true" />
@@ -505,7 +501,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762508810284</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="Refine technician UI: update button styles, align alert and table themes with the green palette, and improve text-muted contrast.">
+      <option name="closed" value="true" />
+      <created>1762509172837</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1762509172837</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -523,7 +527,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add technician UI pages for map, data, and camera management with mock functionalities" />
     <MESSAGE value="Feat: Adds technician login UI" />
     <MESSAGE value="Feat(tech map): Improves technician camera wall" />
     <MESSAGE value="Refactors(tech): Enhances technician UI and data display" />
@@ -548,6 +551,7 @@
     <MESSAGE value="Adds enhanced camera filtering options, improves UI refresh mechanisms, and updates chart rendering for temperature and bitrate." />
     <MESSAGE value="Simplify region and camera selection: add &quot;All&quot; options, update dropdown behavior, and streamline chart rendering logic." />
     <MESSAGE value="Add status-based sorting and clarify camera selection behavior" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add status-based sorting and clarify camera selection behavior" />
+    <MESSAGE value="Refine technician UI: update button styles, align alert and table themes with the green palette, and improve text-muted contrast." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refine technician UI: update button styles, align alert and table themes with the green palette, and improve text-muted contrast." />
   </component>
 </project>

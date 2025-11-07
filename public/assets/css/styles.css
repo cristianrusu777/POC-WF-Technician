@@ -128,6 +128,12 @@ footer {
     height: 80vh;
 }
 
+/* Tech Data layout: make right card match left filters height */
+.fd .frow { height: 100%; }
+.fcol .card { height: 100%; display: flex; flex-direction: column; }
+.dcol { height: 104%; display: flex; flex-direction: column; }
+.dcol > .tab-content { flex: 1; display: flex; flex-direction: column; }
+
 /* === Map === */
 #map {
     height: 100%;
@@ -340,6 +346,34 @@ footer {
 
 /* Muted text aligned to theme gray scale */
 .text-muted { color: var(--gray-600) !important; }
+
+/* Tabs (Bootstrap nav-tabs) */
+.nav-tabs .nav-link { color: var(--gray-600); }
+.nav-tabs .nav-link:hover { color: var(--gray-800); }
+.nav-tabs .nav-link.active {
+  color: var(--gray-800);
+  background-color: var(--green-100);
+  border-color: var(--green-200) var(--green-200) transparent;
+}
+
+/* Form controls */
+.form-control, .form-select { color: var(--gray-700); box-shadow: none; }
+.form-control:focus, .form-select:focus {
+  border-color: var(--gray-500);
+  box-shadow: 0 0 0 0.2rem rgba(16,185,129,0.15);
+}
+
+/* Switches and range inputs */
+.form-check-input:checked { background-color: var(--green-300); border-color: var(--green-300); }
+.form-range::-webkit-slider-thumb { background-color: var(--green-300); }
+.form-range::-moz-range-thumb { background-color: var(--green-300); }
+
+/* Striped tables */
+.table-striped > tbody > tr:nth-of-type(odd) > * { background-color: #f0fdf4; }
+
+/* List groups */
+.list-group-item { color: var(--gray-600); border-color: var(--green-200); }
+.list-group-item-action:hover, .list-group-item:hover { background-color: var(--green-100); color: var(--gray-700); }
 
 .tab-content, #dataTab, table, tr {
     width: 100%;
