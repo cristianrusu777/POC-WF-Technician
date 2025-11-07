@@ -585,6 +585,14 @@ tbody {
   color: #cbd5e1;            /* slate-300 */
 }
 
+/* Highlight for the targeted rename input (Manage Cameras) */
+#adminCamsModal input.rename-target {
+  outline: 2px solid var(--green-400);
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.25);
+  background-color: #f0fdf4; /* green-50 */
+  transition: box-shadow 180ms ease, background-color 180ms ease;
+}
+
 .btn-danger-tech {
     color: #7f1d1d;
     background-color: #fecaca; /* red-200 */

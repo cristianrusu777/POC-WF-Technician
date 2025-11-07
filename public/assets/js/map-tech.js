@@ -303,7 +303,12 @@ window.openRenameFor = function(name){
       input = Array.from(document.querySelectorAll('#adminCamBody input[data-role="rename"]'))
         .find(el => el.value === name);
     }
-    if (input){ input.focus(); input.select(); try { input.scrollIntoView({ behavior:'smooth', block:'center' }); } catch {} }
+    if (input){
+      input.classList.add('rename-target');
+      input.focus(); input.select();
+      try { input.scrollIntoView({ behavior:'smooth', block:'center' }); } catch {}
+      setTimeout(()=> input.classList.remove('rename-target'), 2000);
+    }
   }, 150);
 };
 
@@ -536,8 +541,8 @@ function createMarker(c){
             <span class="status-badge ${statusClass}">${ds}</span>
           </div>
           <div class="action-row" style="margin-top:0.5rem;">
-            <button class="vbutton ${isBookmarked ? 'bookmarked' : ''}" onclick="view('${c.name}')">👁️ View</button>
-            <button class="vbutton ${isBookmarked ? 'bookmarked' : ''}" onclick="toggleBookmark('${c.name}')">${isBookmarked ? 'Bookmarked' : 'Bookmark'}</button>
+            <button class="btn-tech" onclick="view('${c.name}')">👁️ View</button>
+            <button class="btn-secondary-tech ${isBookmarked ? 'bookmarked' : ''}" onclick="toggleBookmark('${c.name}')">${isBookmarked ? 'Bookmarked' : 'Bookmark'}</button>
             <button class="btn-tech" onclick="openRenameFor('${c.name}')">Rename</button>
           </div>
         </div>`;
