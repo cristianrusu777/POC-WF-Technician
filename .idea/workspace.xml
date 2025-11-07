@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="Improve data table UI: remove header corner rounding, center tabs, refine button padding, and auto-generate default selections on load">
+    <list default="true" id="82b24e4d-94d9-476c-98fe-dd50323e791b" name="Changes" comment="adjusts column widths for better alignment and improve text overflow handling.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/assets/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/assets/css/styles.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,15 +113,7 @@
       <workItem from="1762436165131" duration="5840000" />
       <workItem from="1762445082707" duration="12012000" />
       <workItem from="1762495827218" duration="3333000" />
-      <workItem from="1762502051668" duration="9211000" />
-    </task>
-    <task id="LOCAL-00016" summary="Final: working subscription page">
-      <option name="closed" value="true" />
-      <created>1761567766157</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1761567766157</updated>
+      <workItem from="1762502051668" duration="10133000" />
     </task>
     <task id="LOCAL-00017" summary="Final: working subscription page">
       <option name="closed" value="true" />
@@ -508,7 +499,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762510926159</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="adjusts column widths for better alignment and improve text overflow handling.">
+      <option name="closed" value="true" />
+      <created>1762511478673</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1762511478673</updated>
+    </task>
+    <option name="localTasksCounter" value="66" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -526,7 +525,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Refactors(tech): Enhances technician UI and data display" />
     <MESSAGE value="Feat(data): Add data table sorting functionality with UI enhancements" />
     <MESSAGE value="Adds sortable columns and enhance video UI with overlay badges" />
     <MESSAGE value="Improves modal behavior, UI consistency, and grid logic for camera wall" />
@@ -551,6 +549,7 @@
     <MESSAGE value="Refine technician UI: update button styles, align alert and table themes with the green palette, and improve text-muted contrast." />
     <MESSAGE value="adds advanced gray palette, enhance tab interactions, refine form controls, and improve list group and table styling." />
     <MESSAGE value="Improve data table UI: remove header corner rounding, center tabs, refine button padding, and auto-generate default selections on load" />
-    <option name="LAST_COMMIT_MESSAGE" value="Improve data table UI: remove header corner rounding, center tabs, refine button padding, and auto-generate default selections on load" />
+    <MESSAGE value="adjusts column widths for better alignment and improve text overflow handling." />
+    <option name="LAST_COMMIT_MESSAGE" value="adjusts column widths for better alignment and improve text overflow handling." />
   </component>
 </project>
