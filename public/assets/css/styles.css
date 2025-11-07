@@ -387,6 +387,19 @@ footer {
 /* Center the Data/Graphs tabs */
 .dcol #dataTabs { justify-content: center; }
 
+/* Tech Data: fixed column widths for perfect alignment */
+#t_dataTable th, #t_dataTable td { flex: 0 0 auto; box-sizing: border-box; }
+#t_dataTable th:nth-child(1), #t_dataTable td:nth-child(1) { flex-basis: 13%; max-width: 13%; }
+#t_dataTable th:nth-child(2), #t_dataTable td:nth-child(2) { flex-basis: 14%; max-width: 14%; }
+#t_dataTable th:nth-child(3), #t_dataTable td:nth-child(3) { flex-basis: 11%; max-width: 11%; }
+#t_dataTable th:nth-child(4), #t_dataTable td:nth-child(4) { flex-basis: 8%; max-width: 8%; }
+#t_dataTable th:nth-child(5), #t_dataTable td:nth-child(5) { flex-basis: 10%; max-width: 10%; }
+#t_dataTable th:nth-child(6), #t_dataTable td:nth-child(6) { flex-basis: 8%;  max-width: 8%; }
+#t_dataTable th:nth-child(7), #t_dataTable td:nth-child(7) { flex-basis: 10%; max-width: 10%; }
+#t_dataTable th:nth-child(8), #t_dataTable td:nth-child(8) { flex-basis: 8%;  max-width: 8%; }
+#t_dataTable th:nth-child(9), #t_dataTable td:nth-child(9) { flex-basis: 12%;  max-width: 12%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#t_dataTable th:nth-child(10), #t_dataTable td:nth-child(10) { flex-basis: 6%; max-width: 6%; text-align: center; }
+
 tr {
     display: flex;
 }
