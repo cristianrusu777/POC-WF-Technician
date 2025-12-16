@@ -7,7 +7,7 @@ git clone https://github.com/cristianrusu777/POC-WF-Technician.git
 ```
 ## Navigation
 
-Open authentication.html file and open it in a browser.
+Open authentication.html file in a browser.
 
 To view the User wireframe setting, click "Authenticate"
 
